@@ -120,6 +120,8 @@ const Battle = {
     const ctx = this.current;
     if (ctx.qIndex >= ctx.questions.length) {
       // 全問終了
+      // ボス撃破ファンファーレ!
+      SoundFX.bossDefeat();
       this.showModal({
         kind: 'win',
         title: I18n.t('modal_boss_clear_title'),
@@ -172,6 +174,9 @@ const Battle = {
     }
     this.updateStatsUi();
 
+    // 解答した瞬間に「攻撃」SE
+    SoundFX.attack();
+
     if (correct) {
       this.handleCorrect(q);
     } else {
@@ -182,6 +187,8 @@ const Battle = {
   handleCorrect(q) {
     this.ui.enemySprite.classList.add('hit');
     setTimeout(() => this.ui.enemySprite.classList.remove('hit'), 400);
+    // 攻撃SEから少し遅らせて幸せな正解SE
+    setTimeout(() => SoundFX.correct(), 220);
 
     if (this.current.mode === 'boss') {
       this.current.correctCount++;
@@ -211,6 +218,9 @@ const Battle = {
   },
 
   handleWrong(q) {
+    // 攻撃SEから少し遅らせて「走って逃げる足音」
+    setTimeout(() => SoundFX.wrong(), 220);
+
     if (this.current.mode === 'boss') {
       this.showModal({
         kind: 'wrong',

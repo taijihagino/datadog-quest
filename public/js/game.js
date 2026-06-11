@@ -15,6 +15,7 @@ const Game = {
 
   async init() {
     I18n.init();
+    SoundFX.init();
     SaveSystem.init();
     FieldMap.init();
     Battle.init();
@@ -41,7 +42,9 @@ const Game = {
     this.bindRankingModal();
     this.bindIntro();
     this.bindLangToggle();
+    this.bindSoundToggle();
     this.applyI18n();
+    this.updateSoundUi();
 
     const hasSave = await SaveSystem.hasSave();
     document.getElementById('continue-btn').disabled = !hasSave;
@@ -104,11 +107,28 @@ const Game = {
   },
 
   bindLangToggle() {
-    document.querySelectorAll('.lang-btn').forEach(btn => {
+    document.querySelectorAll('.lang-btn[data-lang]').forEach(btn => {
       btn.addEventListener('click', () => {
         const lang = btn.getAttribute('data-lang');
         I18n.set(lang);
       });
+    });
+  },
+
+  bindSoundToggle() {
+    document.querySelectorAll('.sound-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        SoundFX.toggle();
+        this.updateSoundUi();
+      });
+    });
+  },
+
+  updateSoundUi() {
+    const sym = SoundFX.enabled ? '🔊' : '🔇';
+    document.querySelectorAll('.sound-btn').forEach(btn => {
+      btn.textContent = sym;
+      btn.classList.toggle('muted', !SoundFX.enabled);
     });
   },
 
@@ -234,6 +254,7 @@ const Game = {
         break;
       case 'back-title':
         this.stopTimer();
+        SoundFX.stopEndingMusic();
         this.showScreen('title');
         SaveSystem.hasSave().then(has => {
           document.getElementById('continue-btn').disabled = !has;
@@ -350,11 +371,13 @@ const Game = {
   },
 
   startBattle(enemy) {
+    SoundFX.encounter();
     this.showScreen('battle');
     Battle.startNormal(enemy);
   },
 
   startBoss() {
+    SoundFX.encounter();
     this.showScreen('battle');
     Battle.startBoss();
   },
@@ -376,6 +399,8 @@ const Game = {
     await this.autoSave();
 
     if (FieldMap.allEnemiesDefeated()) {
+      // 鍵が外れる音を鳴らしてからメッセージ
+      SoundFX.unlockCastle();
       this.setFieldMessage(I18n.t('field_all_defeated'));
     }
   },
@@ -472,6 +497,8 @@ const Game = {
     await this.renderRankingList('ending-ranking-list', { highlightId: this.rankingSubmittedId, limit: 10 });
 
     this.showScreen('ending');
+    // 幸せなBGM(ループ)を流す
+    SoundFX.startEndingMusic();
   },
 
   async openRankingModal() {
