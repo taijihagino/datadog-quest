@@ -739,6 +739,22 @@ html, body {
   color: var(--nes-green);
 }
 
+.bits-icon {
+  display: inline-block;
+  vertical-align: middle;
+  image-rendering: pixelated;
+}
+
+.rescue-scene .bits-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.ending-art .bits-icon {
+  width: 48px;
+  height: 48px;
+}
+
 /* ===== レスポンシブ ===== */
 @media (max-width: 640px) {
   .title-logo { font-size: 36px; }

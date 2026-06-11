@@ -86,7 +86,7 @@ const I18N_STRINGS = {
     ending_rescue_intro: 'DARK BITSが くずれおちた、その時―',
     ending_rescue_appear: '城の奥から ちいさな ひかりが ふわりと あらわれた。\nそれは ながい あいだ とらわれていた、本物の Bits だった。',
     ending_bits_line: (name) =>
-      `🐶 「ありがとう、${name}!\n` +
+      `<img src="/images/bits.png" alt="Bits" class="bits-icon" /> 「ありがとう、${name}!\n` +
       ` あなたのおかげで、わたしは じゆうになれた。\n` +
       ` Datadog王国に、ふたたび 観測の ひかりを ともそう!」`,
     ending_rescue_outro: '勇者と Bits は、ともに城を出て、\n王国の すみずみまで メトリクスと トレースの\nあたたかな ひかりを とりもどした...',
@@ -234,7 +234,7 @@ const I18N_STRINGS = {
     ending_rescue_intro: 'As DARK BITS crumbled to dust...',
     ending_rescue_appear: 'A small light drifted out from deep within the castle.\nIt was the true Bits, imprisoned for so long.',
     ending_bits_line: (name) =>
-      `🐶 "Thank you, ${name}!\n` +
+      `<img src="/images/bits.png" alt="Bits" class="bits-icon" /> "Thank you, ${name}!\n` +
       ` Thanks to you, I am free again.\n` +
       ` Let us bring the light of observability back to the Datadog Kingdom!"`,
     ending_rescue_outro: 'The hero and Bits left the castle together,\nand restored the warm light of metrics and traces\nto every corner of the kingdom...',
