@@ -138,15 +138,14 @@ const SoundFX = {
   // 不正解:走って逃げる足音
   wrong() {
     if (!this.enabled) return;
-    // 6個の低音thud。間隔は徐々に遅れていって遠ざかる感じ
+    // 6個の足音thud。attack音と被らないよう少し遅らせ、聞こえやすい周波数帯に
     const steps = 6;
     for (let i = 0; i < steps; i++) {
-      const when = i * 0.13 + (i * i) * 0.005; // 加速度的に間延び
-      const vol = 0.22 * (1 - i / (steps + 1));
-      const baseFreq = 90 + (i % 2 === 0 ? 0 : 15); // 左足/右足で少し変える
-      this._tone({ freq: baseFreq, freqEnd: baseFreq * 0.6, dur: 0.07, when, type: 'sine', gain: vol });
-      // ノイズで足音の質感
-      this._noise({ dur: 0.05, when, gain: vol * 0.6, filterStart: 600, filterEnd: 200, q: 1 });
+      const when = 0.06 + i * 0.13 + (i * i) * 0.005;
+      const vol = 0.58 * (1 - i / (steps + 1));        // 0.38 → 0.58 にUP
+      const baseFreq = 160 + (i % 2 === 0 ? 0 : 30);   // 少し高めへ
+      this._tone({ freq: baseFreq, freqEnd: baseFreq * 0.5, dur: 0.11, when, type: 'sine', gain: vol });
+      this._noise({ dur: 0.08, when, gain: vol * 1.0, filterStart: 1400, filterEnd: 350, q: 1.5 });
     }
   },
 
