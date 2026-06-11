@@ -234,29 +234,19 @@ const FieldMap = {
 
   drawEnemy(ctx, e) {
     const def = ENEMY_TYPES[e.type];
-    const color = def.colorByLevel[e.level] || '#888';
     const px = e.x * TILE_SIZE;
     const py = e.y * TILE_SIZE;
 
-    // レベルカラーの背景輪郭
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.35;
+    // 影(レベルに依らないニュートラルな色)
+    ctx.fillStyle = '#000';
+    ctx.globalAlpha = 0.25;
     ctx.beginPath();
     ctx.arc(px + TILE_SIZE / 2, py + TILE_SIZE / 2 + 2, TILE_SIZE / 2 - 2, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
 
-    // 敵のemoji
+    // 敵のemoji(レベル情報は出さない)
     this.drawEmoji(ctx, def.emoji, px + TILE_SIZE / 2, py + TILE_SIZE / 2 + 4, 22);
-
-    // レベルバッジ
-    ctx.fillStyle = '#000';
-    ctx.fillRect(px + TILE_SIZE - 14, py + TILE_SIZE - 12, 12, 10);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 10px monospace';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(e.level, px + TILE_SIZE - 8, py + TILE_SIZE - 7);
   },
 
   drawPlayer(ctx) {
