@@ -1,0 +1,667 @@
+/* ===== Datadog Quest - レトロNES風スタイル ===== */
+
+:root {
+  --nes-bg: #0b0d2c;
+  --nes-bg-dark: #06081c;
+  --nes-fg: #f5f5f7;
+  --nes-accent: #f6c453;
+  --nes-accent2: #ff5b6b;
+  --nes-blue: #4a90e2;
+  --nes-green: #6ad36a;
+  --nes-purple: #8e44ad;
+  --nes-border: #f5f5f7;
+  --dd-purple: #632ca6;
+  --dd-purple-light: #7c3aed;
+  --window-bg: #1a1d3d;
+  --window-border: #f5f5f7;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  color: var(--nes-fg);
+  font-family: 'DotGothic16', 'Press Start 2P', monospace;
+  overflow: hidden;
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.02) 0px,
+      rgba(255, 255, 255, 0.02) 2px,
+      transparent 2px,
+      transparent 4px
+    ),
+    radial-gradient(ellipse at center, #1a1d3d 0%, #06081c 100%);
+}
+
+.screen {
+  display: none;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* ===== ボタン (NES風) ===== */
+.nes-btn {
+  font-family: inherit;
+  font-size: 18px;
+  padding: 12px 24px;
+  background: var(--window-bg);
+  color: var(--nes-fg);
+  border: 4px solid var(--nes-border);
+  cursor: pointer;
+  position: relative;
+  letter-spacing: 1px;
+  transition: transform 0.05s ease;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.nes-btn:hover {
+  background: #2a2d5d;
+}
+
+.nes-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.nes-btn.primary {
+  background: var(--dd-purple);
+  border-color: var(--nes-accent);
+  color: #fff;
+}
+
+.nes-btn.primary:hover {
+  background: var(--dd-purple-light);
+}
+
+.nes-btn.small {
+  font-size: 14px;
+  padding: 6px 14px;
+  border-width: 3px;
+}
+
+/* ===== タイトル画面 ===== */
+.title-frame {
+  text-align: center;
+  padding: 40px;
+  border: 6px double var(--nes-border);
+  background: rgba(11, 13, 44, 0.85);
+  box-shadow: 0 0 0 4px #000, 0 0 60px rgba(124, 58, 237, 0.4);
+  max-width: 720px;
+  width: 90%;
+}
+
+.title-logo {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 56px;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  text-shadow:
+    4px 4px 0 var(--dd-purple),
+    8px 8px 0 #000;
+}
+
+.title-line1 {
+  color: var(--nes-accent);
+  display: block;
+}
+
+.title-line2 {
+  color: var(--nes-fg);
+  display: block;
+}
+
+.title-subtitle {
+  font-size: 18px;
+  color: var(--nes-fg);
+  margin-bottom: 32px;
+  letter-spacing: 2px;
+}
+
+.title-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 320px;
+  margin: 0 auto 24px;
+}
+
+.title-version {
+  font-size: 13px;
+  color: #b1b3d9;
+  margin-top: 16px;
+  animation: blink 1.4s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+/* ===== フィールド画面 ===== */
+.field-hud {
+  width: min(560px, 95%);
+  background: var(--window-bg);
+  border: 4px solid var(--nes-border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.hud-cell { min-width: 0; }
+
+.hud-label {
+  display: block;
+  color: var(--nes-accent);
+  font-size: 11px;
+}
+
+.hud-name, .hud-hp, .hud-defeated, .hud-time {
+  display: block;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-time {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: var(--nes-green);
+}
+
+.hud-center { text-align: center; }
+.hud-right { text-align: right; }
+
+.field-wrap {
+  border: 4px solid var(--nes-border);
+  background: #0a3812;
+  box-shadow: 4px 4px 0 #000;
+  position: relative;
+}
+
+#field-canvas {
+  display: block;
+  image-rendering: pixelated;
+  background: #1d6b2a;
+}
+
+.field-message {
+  width: min(560px, 95%);
+  background: var(--window-bg);
+  border: 4px solid var(--nes-border);
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 15px;
+  box-shadow: 4px 4px 0 #000;
+  min-height: 56px;
+}
+
+.field-controls {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+/* ===== バトル画面 ===== */
+#screen-battle {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      #1a1d3d 0px,
+      #1a1d3d 8px,
+      #14163a 8px,
+      #14163a 16px
+    );
+}
+
+.battle-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(720px, 95%);
+  gap: 10px;
+}
+
+.enemy-stage {
+  width: 100%;
+  background: linear-gradient(180deg, #2c4a7b 0%, #1a3050 100%);
+  border: 4px solid var(--nes-border);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 4px 0 #000;
+  min-height: 220px;
+  position: relative;
+}
+
+.enemy-card {
+  text-align: center;
+}
+
+.enemy-sprite {
+  font-size: 96px;
+  filter: drop-shadow(4px 4px 0 #000);
+  animation: bob 2s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.enemy-sprite.hit {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-12px); filter: drop-shadow(4px 4px 0 #000) brightness(2); }
+  50% { transform: translateX(12px); filter: drop-shadow(4px 4px 0 #000) hue-rotate(90deg); }
+  75% { transform: translateX(-8px); }
+}
+
+.enemy-sprite.defeated {
+  animation: fadeout 0.8s forwards;
+}
+
+@keyframes fadeout {
+  0% { opacity: 1; transform: scale(1) rotate(0); }
+  100% { opacity: 0; transform: scale(0.5) rotate(360deg); }
+}
+
+.enemy-info {
+  margin-top: 8px;
+}
+
+.enemy-name {
+  font-size: 22px;
+  color: var(--nes-accent);
+  letter-spacing: 2px;
+}
+
+.enemy-level {
+  font-size: 16px;
+  color: var(--nes-accent2);
+  margin: 4px 0;
+}
+
+.enemy-category {
+  font-size: 13px;
+  color: var(--nes-fg);
+  background: var(--dd-purple);
+  display: inline-block;
+  padding: 2px 8px;
+  border: 2px solid #fff;
+}
+
+.battle-status {
+  width: 100%;
+  background: var(--window-bg);
+  border: 4px solid var(--nes-border);
+  padding: 10px 14px;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.status-label {
+  width: 110px;
+  color: var(--nes-accent);
+}
+
+.hp-bar {
+  flex: 1;
+  height: 14px;
+  background: #000;
+  border: 2px solid var(--nes-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.hp-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--nes-green) 0%, #2c8a2c 100%);
+  transition: width 0.4s ease;
+}
+
+.hp-bar-fill.low {
+  background: linear-gradient(90deg, var(--nes-accent2) 0%, #8a2c2c 100%);
+}
+
+.battle-question {
+  width: min(720px, 95%);
+  margin-top: 12px;
+}
+
+.msg-window, .question-window {
+  background: var(--window-bg);
+  border: 4px solid var(--nes-border);
+  padding: 14px 18px;
+  box-shadow: 4px 4px 0 #000;
+  margin-bottom: 10px;
+}
+
+.msg-window {
+  font-size: 16px;
+  min-height: 56px;
+}
+
+.question-text {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  color: var(--nes-fg);
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.choice-btn {
+  font-family: inherit;
+  font-size: 16px;
+  text-align: left;
+  padding: 10px 14px;
+  background: #0d1133;
+  color: var(--nes-fg);
+  border: 3px solid var(--nes-border);
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.4;
+}
+
+.choice-btn:hover:not(:disabled) {
+  background: var(--dd-purple);
+  border-color: var(--nes-accent);
+}
+
+.choice-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.choice-btn.correct {
+  background: #1e5a1e;
+  border-color: var(--nes-green);
+  color: var(--nes-fg);
+}
+
+.choice-btn.wrong {
+  background: #5a1e1e;
+  border-color: var(--nes-accent2);
+}
+
+.choice-num {
+  color: var(--nes-accent);
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* ===== モーダル ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-frame {
+  background: var(--window-bg);
+  border: 4px solid var(--nes-border);
+  padding: 24px;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: 6px 6px 0 #000;
+  text-align: center;
+}
+
+.modal-header {
+  font-size: 22px;
+  color: var(--nes-accent);
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.modal-header.correct { color: var(--nes-green); }
+.modal-header.wrong { color: var(--nes-accent2); }
+
+.modal-body {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  text-align: left;
+  background: #0d1133;
+  border: 2px solid #444;
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
+/* ===== 名前入力 ===== */
+.nes-input {
+  width: 100%;
+  font-family: inherit;
+  font-size: 18px;
+  padding: 10px;
+  background: #0d1133;
+  color: var(--nes-fg);
+  border: 3px solid var(--nes-border);
+  outline: none;
+}
+
+.nes-input:focus {
+  border-color: var(--nes-accent);
+}
+
+/* ===== ランキング ===== */
+.ranking-frame {
+  max-width: 640px;
+}
+
+.ranking-help {
+  font-size: 12px;
+  color: #b1b3d9;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.ranking-list {
+  background: #0d1133;
+  border: 2px solid #444;
+  padding: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ranking-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 70px 70px 60px;
+  gap: 8px;
+  padding: 6px 4px;
+  border-bottom: 1px dashed #444;
+  align-items: center;
+}
+
+.ranking-row:last-child { border-bottom: none; }
+
+.ranking-row.self {
+  background: rgba(246, 196, 83, 0.15);
+  border: 2px solid var(--nes-accent);
+  border-left: 6px solid var(--nes-accent);
+}
+
+.rank-rank { color: var(--nes-accent); font-weight: bold; text-align: center; }
+.rank-name { color: var(--nes-fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-score { color: var(--nes-green); text-align: right; font-family: 'Press Start 2P', monospace; font-size: 12px; }
+.rank-time { color: #b1b3d9; text-align: right; font-family: 'Press Start 2P', monospace; font-size: 11px; }
+.rank-acc { color: var(--nes-accent2); text-align: right; font-size: 12px; }
+
+.ranking-row.header {
+  font-size: 11px;
+  color: var(--nes-accent);
+  border-bottom: 2px solid #555;
+  padding-bottom: 4px;
+}
+
+.ranking-empty {
+  text-align: center;
+  padding: 24px;
+  color: #b1b3d9;
+}
+
+.ending-ranking {
+  margin: 20px 0;
+}
+
+.ending-ranking-title {
+  font-size: 16px;
+  color: var(--nes-accent);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+/* ===== エンディング / ゲームオーバー ===== */
+/* ===== イントロ ===== */
+.intro-frame {
+  max-width: 720px;
+  width: 90%;
+  padding: 36px 40px;
+  border: 6px double var(--nes-border);
+  background: rgba(11, 13, 44, 0.95);
+  box-shadow: 0 0 0 4px #000, 0 0 60px rgba(255, 91, 107, 0.3);
+}
+
+.intro-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 22px;
+  color: var(--nes-accent);
+  text-align: center;
+  margin-bottom: 28px;
+  letter-spacing: 4px;
+}
+
+.intro-text {
+  font-size: 18px;
+  line-height: 2;
+  min-height: 320px;
+  white-space: pre-wrap;
+  color: var(--nes-fg);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.intro-text .typing-cursor {
+  display: inline-block;
+  width: 10px;
+  background: var(--nes-accent);
+  margin-left: 4px;
+  animation: blink 0.8s infinite;
+}
+
+.intro-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ending-frame {
+  text-align: center;
+  padding: 40px;
+  border: 6px double var(--nes-border);
+  background: rgba(11, 13, 44, 0.9);
+  max-width: 720px;
+  width: 90%;
+  box-shadow: 0 0 0 4px #000, 0 0 60px rgba(246, 196, 83, 0.3);
+}
+
+.ending-title {
+  font-size: 28px;
+  color: var(--nes-accent);
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+  line-height: 1.4;
+}
+
+.ending-title.gameover {
+  color: var(--nes-accent2);
+}
+
+.ending-art {
+  font-size: 56px;
+  margin: 20px 0;
+  animation: bob 2s ease-in-out infinite;
+}
+
+.ending-text {
+  font-size: 16px;
+  line-height: 1.8;
+  margin: 16px 0;
+}
+
+.ending-stats {
+  font-size: 14px;
+  background: #0d1133;
+  border: 2px solid #444;
+  padding: 12px;
+  margin: 16px 0;
+  text-align: left;
+}
+
+/* ===== レスポンシブ ===== */
+@media (max-width: 640px) {
+  .title-logo { font-size: 36px; }
+  .title-subtitle { font-size: 14px; }
+  .nes-btn { font-size: 15px; padding: 10px 18px; }
+  .choices { grid-template-columns: 1fr; }
+  .enemy-sprite { font-size: 72px; }
+  .question-text { font-size: 16px; }
+}

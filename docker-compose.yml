@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    image: datadog-quest:latest
+    container_name: datadog-quest
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    volumes:
+      # セーブ・ランキングを永続化(ホスト側の ./data をマウント)
+      - ./data:/app/data
+    restart: unless-stopped

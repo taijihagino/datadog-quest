@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Datadog Quest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- タイトル画面 -->
+    <section id="screen-title" class="screen active">
+      <div class="title-frame">
+        <h1 class="title-logo">
+          <span class="title-line1">DATADOG</span>
+          <span class="title-line2">QUEST</span>
+        </h1>
+        <p class="title-subtitle">- Datadog王国を旅して全ての謎を解け -</p>
+        <div class="title-menu">
+          <button class="nes-btn primary" data-action="new-game">はじめから</button>
+          <button class="nes-btn" data-action="continue" id="continue-btn">つづきから</button>
+          <button class="nes-btn" data-action="show-ranking">ランキング</button>
+          <button class="nes-btn" data-action="reset" id="reset-btn">セーブを消す</button>
+        </div>
+        <p class="title-version">Powered by Datadog ▶ Press [はじめから]</p>
+      </div>
+    </section>
+
+    <!-- イントロ画面 -->
+    <section id="screen-intro" class="screen">
+      <div class="intro-frame">
+        <h2 class="intro-title">~ プロローグ ~</h2>
+        <div class="intro-text" id="intro-text"></div>
+        <div class="intro-controls">
+          <button class="nes-btn primary" id="intro-skip">▶ スキップ</button>
+          <button class="nes-btn" id="intro-next" style="display:none;">▶ 冒険にでる</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- フィールド画面 -->
+    <section id="screen-field" class="screen">
+      <div class="field-hud">
+        <div class="hud-cell">
+          <span class="hud-label">ゆうしゃ</span>
+          <span class="hud-name" id="hero-name">-</span>
+        </div>
+        <div class="hud-cell hud-center">
+          <span class="hud-label">HP</span>
+          <span class="hud-hp" id="hud-hp">10/10</span>
+        </div>
+        <div class="hud-cell hud-center">
+          <span class="hud-label">じかん</span>
+          <span class="hud-time" id="hud-time">00:00</span>
+        </div>
+        <div class="hud-cell hud-right">
+          <span class="hud-label">たおした</span>
+          <span class="hud-defeated"><span id="hud-defeated">0</span>/12</span>
+        </div>
+      </div>
+      <div class="field-wrap">
+        <canvas id="field-canvas" width="480" height="384"></canvas>
+      </div>
+      <div class="field-message" id="field-message">
+        <p>方向キー(↑↓←→ または WASD)で移動。敵に触れるとバトル!</p>
+      </div>
+      <div class="field-controls">
+        <button class="nes-btn small" data-action="save">セーブ</button>
+        <button class="nes-btn small" data-action="back-title">タイトルに戻る</button>
+      </div>
+    </section>
+
+    <!-- バトル画面 -->
+    <section id="screen-battle" class="screen">
+      <div class="battle-top">
+        <div class="enemy-stage">
+          <div class="enemy-card" id="enemy-card">
+            <div class="enemy-sprite" id="enemy-sprite">👹</div>
+            <div class="enemy-info">
+              <div class="enemy-name" id="enemy-name">スライム</div>
+              <div class="enemy-level" id="enemy-level">Lv.1</div>
+              <div class="enemy-category" id="enemy-category">APM & RUM</div>
+            </div>
+          </div>
+        </div>
+        <div class="battle-status">
+          <div class="status-line">
+            <span class="status-label">ゆうしゃのHP</span>
+            <div class="hp-bar"><div class="hp-bar-fill" id="hp-bar-fill"></div></div>
+            <span class="status-val" id="battle-hp">10/10</span>
+          </div>
+          <div class="status-line">
+            <span class="status-label">ボス進行</span>
+            <span class="status-val" id="boss-progress" style="display:none;">0/5</span>
+            <span class="status-val" id="normal-progress">通常戦</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="battle-question">
+        <div class="msg-window" id="battle-message">
+          <p id="battle-message-text">▶ <span id="enemy-flavor">敵が現れた!</span></p>
+        </div>
+        <div class="question-window">
+          <div class="question-text" id="question-text">問題を読み込み中...</div>
+          <div class="choices" id="choices"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 勝利エンディング画面 -->
+    <section id="screen-ending" class="screen">
+      <div class="ending-frame">
+        <h1 class="ending-title">Datadog王国に平和が訪れた!</h1>
+        <div class="ending-art">🏰  ✨  🐕  ✨  🌟</div>
+        <p class="ending-text" id="ending-text"></p>
+        <div class="ending-stats" id="ending-stats"></div>
+        <div class="ending-ranking">
+          <div class="ending-ranking-title">🏆 RANKING TOP 10 🏆</div>
+          <div class="ranking-list" id="ending-ranking-list">
+            <p style="text-align:center;padding:12px;">よみこみちゅう...</p>
+          </div>
+        </div>
+        <button class="nes-btn primary" data-action="back-title">タイトルへもどる</button>
+      </div>
+    </section>
+
+    <!-- ゲームオーバー画面 -->
+    <section id="screen-gameover" class="screen">
+      <div class="ending-frame">
+        <h1 class="ending-title gameover">ゆうしゃは たおれた...</h1>
+        <div class="ending-art">💀</div>
+        <p class="ending-text">Datadog王国の旅はここで終わってしまった。<br/>もう一度挑戦しよう!</p>
+        <div class="title-menu">
+          <button class="nes-btn primary" data-action="retry">もう一度</button>
+          <button class="nes-btn" data-action="back-title">タイトルへ</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 共通モーダル(正解/不正解/解説) -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-frame">
+        <div class="modal-header" id="modal-header">けっか</div>
+        <div class="modal-body" id="modal-body">...</div>
+        <button class="nes-btn primary" id="modal-ok">▶ つぎへ</button>
+      </div>
+    </div>
+
+    <!-- 名前入力モーダル -->
+    <div id="name-modal" class="modal hidden">
+      <div class="modal-frame">
+        <div class="modal-header">なまえを いれてください</div>
+        <div class="modal-body">
+          <p style="margin-bottom:12px;">あなたのゆうしゃの なまえは?</p>
+          <input type="text" id="name-input" maxlength="16" class="nes-input" placeholder="ゆうしゃの名前 (最大16文字)" />
+          <p style="font-size:12px;color:#b1b3d9;margin-top:8px;">※ボス撃破時にランキング登録されます</p>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button class="nes-btn primary" id="name-ok">はじめる</button>
+          <button class="nes-btn" id="name-cancel">やめる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ランキングモーダル -->
+    <div id="ranking-modal" class="modal hidden">
+      <div class="modal-frame ranking-frame">
+        <div class="modal-header">🏆 RANKING 🏆</div>
+        <div class="ranking-help">スコア = (正解率×10000) - 経過秒数</div>
+        <div class="ranking-list" id="ranking-list">
+          <p style="text-align:center;padding:20px;">よみこみちゅう...</p>
+        </div>
+        <button class="nes-btn primary" id="ranking-close">▶ とじる</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/js/sprites.js"></script>
+  <script src="/js/questions.js"></script>
+  <script src="/js/map.js"></script>
+  <script src="/js/battle.js"></script>
+  <script src="/js/save.js"></script>
+  <script src="/js/game.js"></script>
+</body>
+</html>
