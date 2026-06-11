@@ -104,6 +104,50 @@ html, body {
   border-width: 3px;
 }
 
+/* ===== 言語トグル ===== */
+.lang-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  z-index: 5;
+}
+.title-frame { position: relative; }
+
+.hud-lang-toggle {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+}
+
+#screen-field { position: relative; }
+
+.lang-btn {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 3px 10px;
+  background: #0d1133;
+  color: var(--nes-fg);
+  border: 2px solid var(--nes-border);
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.lang-btn.small {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-width: 1px;
+}
+
+.lang-btn.active {
+  background: var(--nes-accent);
+  color: #000;
+  border-color: var(--nes-accent);
+}
+
 /* ===== タイトル画面 ===== */
 .title-frame {
   text-align: center;
@@ -654,6 +698,26 @@ html, body {
   padding: 12px;
   margin: 16px 0;
   text-align: left;
+}
+
+.rescue-scene {
+  font-size: 14px;
+  line-height: 1.9;
+  background: rgba(246, 196, 83, 0.12);
+  border: 3px double var(--nes-accent);
+  padding: 16px;
+  margin: 12px 0;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.rescue-scene .narrator {
+  color: var(--nes-accent);
+  font-weight: bold;
+}
+
+.rescue-scene .bits-line {
+  color: var(--nes-green);
 }
 
 /* ===== レスポンシブ ===== */

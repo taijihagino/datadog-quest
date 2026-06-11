@@ -1,0 +1,1253 @@
+{
+  "categories": {
+    "apm_rum": "APM & RUM",
+    "infra": "Infrastructure Monitoring",
+    "security": "Security",
+    "agent_obs": "Agent Observability",
+    "cicd": "CI/CD",
+    "slo": "SLO",
+    "integration": "Integration & Instrumentation"
+  },
+  "questions": {
+    "apm_1_a": {
+      "question": "In Datadog APM, what is a 'Trace'?",
+      "choices": [
+        "A record of how a single request traversed the system (a set of Spans)",
+        "A long-term time-series history of one server's CPU utilization",
+        "A flat list of raw log messages emitted by every application",
+        "A list of alert notifications that have been sent in the past"
+      ],
+      "explanation": "A Trace is the set of Spans representing how a single request flowed across services."
+    },
+    "apm_1_b": {
+      "question": "What does Datadog RUM (Real User Monitoring) monitor?",
+      "choices": [
+        "The actual browser/mobile experience of real end users",
+        "Disk I/O wait time on storage servers",
+        "The total number of running pods in a Kubernetes cluster",
+        "Slow query logs from the relational database engine only"
+      ],
+      "explanation": "RUM measures real users' browser/mobile experiences (LCP, INP, clicks, etc.)."
+    },
+    "apm_1_c": {
+      "question": "Which of the following is NOT included in a Span?",
+      "choices": [
+        "Remaining battery level of the operator's laptop",
+        "Operation name and resource identifier",
+        "Span start time and duration",
+        "Reference to the parent span (parent span ID)"
+      ],
+      "explanation": "A Span carries operation/resource/service names, timing, tags, and parent-span relations, but not device battery info."
+    },
+    "apm_1_d": {
+      "question": "What does the APM 'Service' entity represent?",
+      "choices": [
+        "A logical unit of applications sharing the same responsibility",
+        "A unit that represents each individual physical host or VM",
+        "A single, individual request issued by the client",
+        "The current version string of the Datadog Agent"
+      ],
+      "explanation": "A Service is a logical unit like 'checkout-api' that may span multiple hosts/Pods."
+    },
+    "apm_1_e": {
+      "question": "What is RUM's Session Replay?",
+      "choices": [
+        "Replays user interactions like a recorded video",
+        "Rewinds server-side logs back to a previous state",
+        "Automatically rolls back database transactions",
+        "Rewinds the most recent run of a CI pipeline"
+      ],
+      "explanation": "Session Replay reproduces DOM changes so UX bugs can be reviewed (PII masking is recommended)."
+    },
+    "apm_2_a": {
+      "question": "Which HTTP headers are typically used to propagate trace context from service A to service B?",
+      "choices": [
+        "x-datadog-trace-id / x-datadog-parent-id and friends (or W3C traceparent)",
+        "Just Authorization and Set-Cookie used to express span parent/child relations directly",
+        "Hash-concatenated User-Agent and Accept-Language used as a custom trace ID format",
+        "Only Content-Length and Transfer-Encoding used to imply span hierarchy"
+      ],
+      "explanation": "Datadog-specific x-datadog-* headers, or W3C Trace Context (traceparent/tracestate), are used."
+    },
+    "apm_2_b": {
+      "question": "With head-based sampling at sampling_rate=0.1 (10%), what is the behavior?",
+      "choices": [
+        "The decision is made at the root span and applied to all spans of the same trace",
+        "Each span is independently sampled at 10%, mixing kept and dropped spans within a trace",
+        "Error spans are always retained at 100% regardless of the sample rate",
+        "RUM sessions are automatically sampled at the same 10% rate as a side-effect"
+      ],
+      "explanation": "Head-based sampling decides at the trace head and propagates the decision to all subsequent spans."
+    },
+    "apm_2_c": {
+      "question": "What does RUM's INP (Interaction to Next Paint) Core Web Vital measure?",
+      "choices": [
+        "The responsiveness from a user interaction to the next visual update",
+        "Only the time until the page's first paint completes",
+        "The original image size in KB of the LCP element",
+        "The time spent establishing a TCP connection to the server"
+      ],
+      "explanation": "INP measures end-to-end interaction latency and replaced FID as a Core Web Vital in 2024."
+    },
+    "apm_2_d": {
+      "question": "What can you analyze by enabling the Continuous Profiler?",
+      "choices": [
+        "Per-function CPU / memory / lock hotspots inside the process",
+        "Time spent by the browser evaluating CSS selectors",
+        "Failure rate of reverse DNS lookups over time",
+        "Average delay before an outgoing email is delivered"
+      ],
+      "explanation": "Continuous Profiler shows function-level CPU/memory/lock-contention hotspots with low overhead in production."
+    },
+    "apm_2_e": {
+      "question": "What is the main purpose of Error Tracking's grouping logic?",
+      "choices": [
+        "Aggregate many errors with the same root cause into a single Issue to reduce noise",
+        "Automatically open a separate JIRA ticket for each individual error occurrence",
+        "Compress all error bodies into a database to minimize storage usage",
+        "Use ML to bring the application's error count automatically down to zero"
+      ],
+      "explanation": "Error Tracking groups errors by fingerprint (stack trace, etc.) to suppress operational noise."
+    },
+    "apm_2_f": {
+      "question": "How do you centrally manage service ownership (team) in Service Catalog?",
+      "choices": [
+        "Place a service.datadog.yaml (schema) file in the repository",
+        "Write an owner field inside the containerDefinitions of an ECS task definition",
+        "Embed team info in API Gateway stageVariables",
+        "Encode team=foo into a DNS TXT record for the service domain"
+      ],
+      "explanation": "Service Definition YAML lets you declare owner, Slack, PagerDuty, repo, Tier, and other metadata."
+    },
+    "apm_2_g": {
+      "question": "What is the most appropriate use of Span Links?",
+      "choices": [
+        "Express causal but non-parent/child relations between traces (batch, fan-in, etc.)",
+        "Share span IDs as URL parameters when sending dashboard links",
+        "A standard format for encrypting span payloads on the client side",
+        "Join multiple RUM sessions into a single trace on the server side"
+      ],
+      "explanation": "Span Links is the OpenTelemetry standard for capturing non-parent relations like batch and async consumption."
+    },
+    "apm_3_a": {
+      "question": "What is the most accurate difference between APM Retention Filters (ingestion control) and head-based sampling?",
+      "choices": [
+        "Retention Filters select what to index after ingestion, while head-based decides whether to ingest at all",
+        "They are completely synonymous, with only documentation naming differing while both mean the same thing",
+        "Retention Filters run on the browser/client side and do not involve the Agent or intake server at all",
+        "Head-based sampling affects only RUM sessions and never impacts APM trace ingestion at all"
+      ],
+      "explanation": "Head-based controls 'whether to send' at the tracer; Retention Filters decide 'whether to index for long-term storage' after intake."
+    },
+    "apm_3_b": {
+      "question": "What is essential to link RUM sessions with APM traces so browser fetches can be followed to backend spans?",
+      "choices": [
+        "Configure allowedTracingUrls in the RUM SDK so that the server-side tracer receives requests with trace headers",
+        "Run RUM as a long-running server process and never deliver any JavaScript to the browser at all",
+        "Issue session cookies only on the server side and forbid any JavaScript on the client from reading them",
+        "Rewrite the X-Forwarded-For header to a random value on every request via a reverse proxy"
+      ],
+      "explanation": "allowedTracingUrls lets the RUM SDK inject trace headers so the backend APM trace is connected."
+    },
+    "apm_3_c": {
+      "question": "What is a key characteristic of Trace Metrics (auto-generated hits/errors/duration time series)?",
+      "choices": [
+        "They are aggregated from 100% of traffic regardless of sampling, suited for dashboards",
+        "They are sampled at the same head-based rate and lose accuracy at low sampling rates",
+        "They are the exact same dataset as indexed spans, with the same storage and cost profile",
+        "They are automatically calculated from logs and do not involve the APM tracer at all"
+      ],
+      "explanation": "Trace Metrics are aggregated by the Agent on 100% of traffic regardless of sampling, ideal for long-term trends."
+    },
+    "apm_3_d": {
+      "question": "What does Watchdog Insights automatically detect?",
+      "choices": [
+        "Anomalies and likely root-cause candidates across APM, Logs, and infrastructure metrics",
+        "Only abnormal monthly AWS bill increases as a cloud-cost monitoring feature",
+        "A time-series of all edits made to Kubernetes ConfigMaps with diffs displayed",
+        "The TLS certificate key length (2048/4096-bit) ratios collected on dashboards"
+      ],
+      "explanation": "Watchdog uses ML to detect latency/error-rate anomalies and deployment-induced regressions."
+    },
+    "apm_3_e": {
+      "question": "What is the correct mechanism for Single Step Instrumentation (SSI) of JVM apps?",
+      "choices": [
+        "The Agent or Admission Controller injects -javaagent at startup so traces are produced without code changes",
+        "All JVM applications must first be converted to WebAssembly and re-run inside the browser sandbox",
+        "Every developer manually rewrites the JVM compiler optimization flags and rebuilds the entire app",
+        "javaagent.jar files are stored as BLOBs in the database and retrieved at JVM startup before execution"
+      ],
+      "explanation": "SSI injects the tracer via JVM args or init container, without rebuilding or changing the start command."
+    },
+    "infra_1_a": {
+      "question": "Which component collects host CPU/memory metrics for Datadog?",
+      "choices": [
+        "Datadog Agent (a host-resident process collecting metrics and logs)",
+        "Datadog Forwarder (a Lambda function used for log forwarding)",
+        "Datadog Lambda Layer (a library embedded into serverless functions)",
+        "Datadog RUM SDK (a library that runs inside the user's browser)"
+      ],
+      "explanation": "The Datadog Agent is installed on hosts and collects system metrics, logs, and more."
+    },
+    "infra_1_b": {
+      "question": "What is the main use of the Host Map?",
+      "choices": [
+        "Visualize the state of the whole infrastructure and filter by tags",
+        "Display a timeline of code change history in a repository",
+        "Issue and manage organization-level access tokens from a screen",
+        "Review monthly cloud service billing information on a dashboard"
+      ],
+      "explanation": "Host Map shows many hosts at a glance with filtering by tags and resource state."
+    },
+    "infra_1_c": {
+      "question": "What does the Datadog Agent's Live Process feature give you?",
+      "choices": [
+        "A list of running processes with each process's CPU/memory consumption",
+        "The total number of DOM nodes and DOM byte size that the browser built",
+        "The BGP route information being exchanged between routers with AS numbers",
+        "The number of S3 buckets and per-region storage size distribution"
+      ],
+      "explanation": "Enabling process_config gives per-process resource usage."
+    },
+    "infra_1_d": {
+      "question": "What is the main purpose of a 'tag'?",
+      "choices": [
+        "A key:value pair to classify and filter metrics across multiple dimensions",
+        "A feature to automatically encrypt IP addresses found in log messages",
+        "A setting that switches the visual color theme of dashboards in the UI",
+        "Metadata used to arbitrarily extend the expiration date of API keys"
+      ],
+      "explanation": "Tags like env:prod, service:api, team:platform express dimensions and enable drilldown analysis."
+    },
+    "infra_1_e": {
+      "question": "Which operating system is NOT officially supported by the Datadog Agent?",
+      "choices": [
+        "The original 8-bit Nintendo Family Computer / NES console itself",
+        "Linux (various amd64 / arm64 distributions of mainstream distros)",
+        "Windows Server and Windows 10 or later desktop operating systems",
+        "macOS (both Intel and Apple Silicon-based modern macOS versions)"
+      ],
+      "explanation": "The Datadog Agent supports Linux/Windows/macOS; consumer game consoles are not supported."
+    },
+    "infra_2_a": {
+      "question": "What is the standard layout to collect node-level metrics with Datadog Agent on Kubernetes?",
+      "choices": [
+        "A DaemonSet with one Pod per node plus a Cluster Agent for aggregation",
+        "A Deployment with replicas=1, where a single Pod handles the whole cluster",
+        "A CronJob that fires once a day and sends a batched dump of metrics",
+        "A sidecar container co-located with every application Pod in the cluster"
+      ],
+      "explanation": "Deploy a DaemonSet on each node and use the Cluster Agent for cluster-wide data (KSM, etc.)."
+    },
+    "infra_2_b": {
+      "question": "Which annotation prefix attaches integration configs to containers via Autodiscovery?",
+      "choices": [
+        "ad.datadoghq.com/<container_name>.check_names, etc.",
+        "datadog/legacy.yaml (a deprecated local config format no longer supported)",
+        "ad-old/v1beta (an unsupported beta-era apiVersion no longer recognized)",
+        "Just prometheus.scrape: true added to the Pod annotations is sufficient"
+      ],
+      "explanation": "Pod/container annotations ad.datadoghq.com/<name>.* specify check_names, init_configs, and instances."
+    },
+    "infra_2_c": {
+      "question": "What is the main role of the Cluster Agent?",
+      "choices": [
+        "Aggregate kube-apiserver access on behalf of node Agents and distribute Cluster Checks at scale",
+        "Periodically restart all Pods running in the monitored cluster to keep their state clean",
+        "Replace the standard Kubernetes scheduler with a custom Pod placement scheduling logic",
+        "Periodically back up data from PersistentVolumes to an external storage destination"
+      ],
+      "explanation": "The Cluster Agent fronts the kube-apiserver, distributes Cluster Checks, serves HPA external metrics, etc."
+    },
+    "infra_2_d": {
+      "question": "To track resources of ephemeral containers, what should the Agent enable?",
+      "choices": [
+        "process collection and container lifecycle events (Live Container view)",
+        "RUM SDK options designed for cookie-consent popup display tuning behavior",
+        "RUM Session Replay enabled at 100% recording across every page in the app",
+        "Synthetic API Tests running once a minute that probe each container HTTP"
+      ],
+      "explanation": "Enabling process_collection_enabled and container lifecycle events allows ephemeral containers to be observed."
+    },
+    "infra_2_e": {
+      "question": "What is the basic structure of an Agent Custom Check?",
+      "choices": [
+        "A Python class extending AgentCheck, plus checks.d/*.py and conf.d/*.yaml files",
+        "Code written in C and loaded as a Linux kernel module communicating via syscalls",
+        "A SQL stored procedure defined in the database that the Agent CALLs periodically",
+        "A Chrome/Firefox browser extension that submits collected values during user interaction"
+      ],
+      "explanation": "Custom Checks subclass AgentCheck with conf.d YAML and checks.d Python files."
+    },
+    "infra_2_f": {
+      "question": "What does Datadog's Cloud Cost Management provide?",
+      "choices": [
+        "Links cloud billing data with usage metrics to reveal causes of overspending",
+        "An approval workflow that automatically approves next quarter's deployment budgets",
+        "Automatically rewrites database queries to use indexes and lower monthly cost",
+        "Manages OS and driver auto-updates while optimizing software license payments"
+      ],
+      "explanation": "Cloud Cost Management unifies cost and observability so cost drivers can be analyzed by service and environment."
+    },
+    "infra_2_g": {
+      "question": "What is the standard order through which the Agent aggregates and forwards metrics to Datadog?",
+      "choices": [
+        "Check → Aggregator → Forwarder → intake API",
+        "Webhook → Lambda → S3 → CSV export → database import",
+        "DB → DB trigger → JSON view → external API → Datadog UI",
+        "Browser → DOM event → DNS resolution → SMTP server route"
+      ],
+      "explanation": "Check → Aggregator (statistics) → Forwarder (buffer/retry) → intake."
+    },
+    "infra_3_a": {
+      "question": "What does Network Performance Monitoring (NPM) use to observe flows at the kernel level?",
+      "choices": [
+        "system-probe (eBPF and conntrack) to collect sockets/flows",
+        "A RUM SDK resident in the browser collecting values aggregated through a WebSocket",
+        "An AWS S3 lifecycle policy that aggregates flow logs once a day and ingests them",
+        "Inference of inter-service dependencies from DNS SRV records as an indirect approach"
+      ],
+      "explanation": "NPM's system-probe component observes kernel socket events via eBPF to collect flows."
+    },
+    "infra_3_b": {
+      "question": "How can Universal Service Monitoring (USM) recognize services without changing code?",
+      "choices": [
+        "Because eBPF auto-detects L7 protocols (HTTP, etc.) and service boundaries",
+        "Because it polls the GitHub API every minute to analyze repository structure",
+        "Because it dynamically rewrites the host DNS cache to force-determine boundaries",
+        "Because it runs kubectl get periodically via cron and extracts service inventories"
+      ],
+      "explanation": "USM observes L7 packets via eBPF, automatically discovering services and endpoints (no code change)."
+    },
+    "infra_3_c": {
+      "question": "What is the advantage of a Distribution Metric (distribution-typed custom metric)?",
+      "choices": [
+        "Raw values are sent and the server-side computes accurate cross-host percentiles (p95, etc.)",
+        "Only integer values can be sent; floating-point and percentile queries are not supported",
+        "A complete JSON Schema validation is mandatory at send time to prevent malformed data",
+        "It can be sent independent of host count, but loses the ability to compute any percentile"
+      ],
+      "explanation": "Distribution sends raw values so cross-host p50/p95/p99 can be computed precisely on the server side."
+    },
+    "infra_3_d": {
+      "question": "Which describes how Cluster Checks are distributed to nodes?",
+      "choices": [
+        "The Cluster Agent holds the check configs and dynamically dispatches them to ClusterCheckRunners or node Agents",
+        "Every node in the cluster runs exactly the same Cluster Checks in parallel as a maximally redundant configuration",
+        "The Helm chart's lifecycle hooks continuously launch Cluster Checks via a built-in mechanism in Helm itself",
+        "Each Check is baked into the container image during the Dockerfile build and auto-invoked at container init"
+      ],
+      "explanation": "Cluster Checks are managed centrally by the Cluster Agent and rebalanced across Runners or node Agents."
+    },
+    "infra_3_e": {
+      "question": "Which tagging practice is NOT a good practice?",
+      "choices": [
+        "Continuously applying very high-cardinality values like user IDs or request IDs as tag values",
+        "Applying env / service / version uniformly via Unified Service Tagging across all telemetry",
+        "Applying team / owner / oncall responsibility tags per service to clarify escalation contacts",
+        "Standardizing naming conventions so that tag values do not contradict their key names"
+      ],
+      "explanation": "High-cardinality tag values cause cost and aggregation issues; IDs should be span/log attributes, not tags."
+    },
+    "infra_3_f": {
+      "question": "Which information is most characteristic of Database Monitoring (DBM)?",
+      "choices": [
+        "Per-normalized-SQL execution plans, wait events, and top-query statistics",
+        "Monthly RDS billing statements (PDF invoices) automatically retrieved and shown",
+        "Full SQL text encrypted and stored in S3 for later full-text search on demand",
+        "DNS resolver cache hit rate and average TTL aggregated per database instance"
+      ],
+      "explanation": "DBM observes per-normalized-SQL plans, wait events, and top queries, and can correlate with APM."
+    },
+    "sec_1_a": {
+      "question": "What does Datadog Cloud SIEM primarily detect?",
+      "choices": [
+        "Suspicious security behavior identified by analyzing logs across sources",
+        "Changes in the average time it takes Docker containers to start up",
+        "The relationship between host CPU temperature and cooling fan RPM",
+        "The semver version distribution and skew of JavaScript dependencies"
+      ],
+      "explanation": "Cloud SIEM analyzes logs broadly to detect security threats."
+    },
+    "sec_1_b": {
+      "question": "What does the Sensitive Data Scanner do?",
+      "choices": [
+        "Detects PII / secrets in logs and masks them automatically",
+        "Continuously detects when processes are CPU throttled or starved",
+        "Runs Synthetic external tests periodically to confirm availability",
+        "Detects misbehaving Pods and instructs Kubernetes to restart them"
+      ],
+      "explanation": "SDS detects sensitive information in logs, RUM, APM and masks it."
+    },
+    "sec_1_c": {
+      "question": "What is the main purpose of Application Security Management (ASM)?",
+      "choices": [
+        "Detect and protect against application-layer attacks (SQLi, XSS, etc.)",
+        "A physical feature controlling server rack cooling fan rotation speeds",
+        "An auxiliary UI feature that suggests names for S3 storage buckets",
+        "A feature that automatically optimizes DNS TTL values for workloads"
+      ],
+      "explanation": "ASM uses APM traces and SDKs to detect and block application-layer attacks."
+    },
+    "sec_1_d": {
+      "question": "Which falls in the scope of CSM (Cloud Security Management)?",
+      "choices": [
+        "Detection of cloud resource misconfigurations and vulnerabilities",
+        "A bot that automatically replies on your behalf to Slack peer-reviews",
+        "An office-tool integration that sorts rows in opened Excel spreadsheets",
+        "An email client feature that generates auto-reply messages for inboxes"
+      ],
+      "explanation": "CSM is a cloud security product family including Cloud Posture, Identity, Workload Protection, and more."
+    },
+    "sec_1_e": {
+      "question": "What is Audit Trail used for?",
+      "choices": [
+        "Retains who-did-what audit logs of operations inside the Datadog organization",
+        "Automatically blocks external attacks against the application like a built-in WAF",
+        "An option that end-to-end encrypts in-flight metrics during transport on the wire",
+        "Obfuscates the RUM SDK delivered to browsers to make reverse engineering harder"
+      ],
+      "explanation": "Audit Trail records user actions and API access for compliance use cases."
+    },
+    "sec_2_a": {
+      "question": "Which is a typical detection from CSM Misconfigurations?",
+      "choices": [
+        "Misconfigured public S3 buckets or the presence of over-permissive IAM policies",
+        "Compiler warning messages emitted while building Kotlin applications over time",
+        "Front-end JavaScript bundle file size that has grown beyond a certain threshold",
+        "Continuous evaluation of whether the database query optimizer is choosing a sane execution plan"
+      ],
+      "explanation": "CSM Misconfigurations detects cloud configuration issues based on CIS benchmarks, etc."
+    },
+    "sec_2_b": {
+      "question": "What does Software Composition Analysis (SCA) detect?",
+      "choices": [
+        "Known vulnerabilities (CVEs) and license risks in OSS dependencies",
+        "Continuous benchmark statistics of L1 / L2 CPU cache miss rate",
+        "Reports recommending optimizations to reduce Docker build time",
+        "Geographic comparison of DNS resolver response latency worldwide"
+      ],
+      "explanation": "SCA reveals CVEs, license info, and recommended remediated versions for app dependencies."
+    },
+    "sec_2_c": {
+      "question": "Which is INCORRECT as a prerequisite for enabling ASM In-App WAF (blocking)?",
+      "choices": [
+        "The Datadog Agent running for that service must be stopped beforehand",
+        "An APM tracer of a supported version must be embedded in the application",
+        "The Datadog organization must have ASM (Threat Management) entitlement",
+        "Blocking mode must be explicitly enabled on the target service's settings"
+      ],
+      "explanation": "ASM blocking is linked to the APM tracer; stopping the Agent breaks it."
+    },
+    "sec_2_d": {
+      "question": "Which is the detection scope of CSM Identity Risks?",
+      "choices": [
+        "Identity risks like over-permissioned IAM and long-unused access keys",
+        "Cases where file upload paths fail to encrypt content at rest correctly",
+        "Continuous detection and automatic blocking of DNS cache poisoning attacks",
+        "Mapping areas inside the office where Wi-Fi signal strength is weakest"
+      ],
+      "explanation": "CSM Identity Risks finds excessive permissions, stale access keys, and unused roles."
+    },
+    "sec_2_e": {
+      "question": "How do you mask credit-card numbers in Logs with Sensitive Data Scanner?",
+      "choices": [
+        "Create a Scanning Group plus Rule matched in the target pipeline and configure a replacement action",
+        "Delete all data from the Logs Index regularly and switch to never physically retaining any PII",
+        "Use the RUM SDK to draw an in-browser canvas that visually obscures personal data before sending",
+        "Disable every Cloud SIEM detection rule so that the PII scanning processing is entirely turned off"
+      ],
+      "explanation": "SDS defines a Group → Rule for scope and pattern, with hash/replace actions."
+    },
+    "sec_2_f": {
+      "question": "Which detects '10 login failures from the same IP within 30 minutes' as a Detection Rule?",
+      "choices": [
+        "A Threshold (or New Value / Anomaly) type Detection Rule",
+        "A Notebook with a Markdown widget that documents the condition by snapshot",
+        "A Synthetic API Test running every minute that triggers Detection Rules on failure",
+        "A custom display rule that colors dependent services on the Service Map differently"
+      ],
+      "explanation": "Threshold-style Detection Rules express count-based alerting conditions."
+    },
+    "sec_3_a": {
+      "question": "Which is a typical event detected by Cloud Workload Security (CWS)?",
+      "choices": [
+        "Unexpected runtime behavior inside containers such as execve or file overwrites",
+        "Trends in GitHub repository star counts and fork counts fluctuating rapidly",
+        "Variation in the minification ratio of a JavaScript bundle across builds",
+        "The depth of CSS selector nesting and its impact on browser rendering"
+      ],
+      "explanation": "CWS uses eBPF to observe kernel events (process/file/network) and detect suspicious behavior."
+    },
+    "sec_3_b": {
+      "question": "Which describes the DSL for custom CWS Agent Rules?",
+      "choices": [
+        "Boolean expressions combining event attributes such as process/file/network properties",
+        "A direct copy of a publicly available JSON Schema reused unchanged as the rule condition",
+        "A single regular expression (regex) only, making this a deliberately simple expression form",
+        "Identical syntax and key structure to Helm chart values.yaml as a declarative format"
+      ],
+      "explanation": "CWS rules combine event kinds and attributes (filename, process.argv, etc.) as boolean conditions."
+    },
+    "sec_3_c": {
+      "question": "Which API lets you control custom ASM attack-blocking logic precisely from the application code?",
+      "choices": [
+        "ddtrace ASM APIs (set_user / track_custom_event / BlockingException, etc.) embedded in code",
+        "Use Cloud Functions cold-start hooks to dynamically toggle the network interface per request",
+        "Only rewrite the DNS A record for suspected attacker IPs to redirect their traffic to a sinkhole",
+        "Configure extremely strict CORS on S3 buckets to physically block every browser HTTP request"
+      ],
+      "explanation": "ASM SDKs let you tag authenticated users, raise custom events, and block specific users/IPs."
+    },
+    "sec_3_d": {
+      "question": "What is the main value of integrating SCA vulnerabilities with APM services?",
+      "choices": [
+        "Prioritize vulnerability management to services actually running and communicating in production",
+        "Stop the entire CI pipeline as a safety measure and rebuild every application from a clean slate",
+        "Automatically clear the DNS resolver cache when a vulnerability is detected to prevent abuse",
+        "Automatically encrypt all collected RUM user sessions when a vulnerability surfaces as evidence"
+      ],
+      "explanation": "Prioritization can consider exploitability + production + public-facing exposure."
+    },
+    "sec_3_e": {
+      "question": "Which factor does Datadog NOT combine into its threat score from a threat-modeling perspective?",
+      "choices": [
+        "The X, Y coordinates at which widgets are positioned on dashboard layouts",
+        "The criticality of the asset and its exposure to outside networks",
+        "Reproducibility of signals and pattern match against known attacks (MITRE ATT&CK)",
+        "Whether the asset truly has exploitable vulnerabilities present"
+      ],
+      "explanation": "Threat scores combine asset criticality/exposure and signal characteristics; UI layout is unrelated."
+    },
+    "agent_1_a": {
+      "question": "What does Datadog LLM Observability observe?",
+      "choices": [
+        "Prompts, responses, cost, and latency of LLM applications",
+        "Filesystem inode count and per-directory usage statistics",
+        "Inter-AS BGP routing information and AS-path history",
+        "Only TLS certificate expiry dates and CA trust-chain checks"
+      ],
+      "explanation": "LLM Observability surfaces chains, agents, tool calls, cost, and quality."
+    },
+    "agent_1_b": {
+      "question": "Which concept represents each step when visualizing an AI agent workflow?",
+      "choices": [
+        "A Span (or the hierarchical structure of a Trace built from them)",
+        "A Container Image registered in a container registry as an artifact",
+        "A DNS A record mapping the agent name to an IP for resolution",
+        "A JSON Schema describing the input/output contract of an agent call"
+      ],
+      "explanation": "LLM Observability uses Spans/Traces, like APM, to represent each step."
+    },
+    "agent_1_c": {
+      "question": "Which is typical metadata captured by LLM Observability?",
+      "choices": [
+        "input / output / tokens / cost / model_name and similar fields",
+        "Average per-minute fan rotation speed of monitored physical servers",
+        "Character length and update frequency statistics of DNS TXT records",
+        "RDS binlog write position (seek offset) and current replication lag"
+      ],
+      "explanation": "Prompts, outputs, token counts, model, cost, and other LLM-specific metadata are captured."
+    },
+    "agent_1_d": {
+      "question": "Which is the most appropriate advantage of LLM observation?",
+      "choices": [
+        "Unified management of quality, cost, latency, and failures",
+        "Directly cool down inference GPUs to extend their service life",
+        "Automatically shard the RDS database to parallelize queries",
+        "Improve DNS resolver reverse-lookup efficiency for clients"
+      ],
+      "explanation": "LLM Observability provides a unified foundation for quality, cost, and failures in dev and prod."
+    },
+    "agent_1_e": {
+      "question": "What does a 'Span' represent in LLM Observability?",
+      "choices": [
+        "A single step like an LLM call, tool execution, retrieval, or agent",
+        "A node in a database index tree (a B+tree leaf, for example)",
+        "A single CDN edge location (POP) and its physical server set",
+        "A single Slack workspace's channel and its message threads"
+      ],
+      "explanation": "Spans have kinds like LLM/Tool/Workflow/Retrieval/Embedding to visualize the workflow."
+    },
+    "agent_2_a": {
+      "question": "Which feature is used for automatic evaluation of hallucination, failure, and off-topic in LLM apps?",
+      "choices": [
+        "Quality Evaluations (LLM-as-a-judge and similar auto-evaluators)",
+        "Synthetic Browser Tests run as scheduled end-to-end UI verification",
+        "Network Path Analysis dissecting end-to-end network paths in detail",
+        "DNS SPF records used for sender-domain authentication checks"
+      ],
+      "explanation": "LLM Observability's Evaluations auto-evaluate failure-to-answer, hallucination, topic drift, and more."
+    },
+    "agent_2_b": {
+      "question": "What is needed to record token counts and cost of LLM calls?",
+      "choices": [
+        "Integrate ddtrace's LLM Observability SDK (provider-specific auto-instrumentation)",
+        "Turn on the Sensitive Data Scanner to indirectly count input tokens from text",
+        "Run the Datadog Mobile App as a server-side daemon notified on each request",
+        "Enable the JIRA integration so a ticket is opened per request and tallied"
+      ],
+      "explanation": "ddtrace or the SDK auto-instruments calls to OpenAI/Anthropic/etc., recording tokens and cost."
+    },
+    "agent_2_c": {
+      "question": "What is a Session in LLM Observability?",
+      "choices": [
+        "A unit grouping multiple Traces/Spans belonging to the same user/conversation",
+        "A single open TCP connection between a client and a server in steady state",
+        "An alias for the namespace concept providing logical isolation in Kubernetes",
+        "A single node rendered on the Service Map representing a dependent service"
+      ],
+      "explanation": "A Session groups conversations across traces, useful for chat UX analytics and feedback linking."
+    },
+    "agent_2_d": {
+      "question": "What is the purpose of sending 👍/👎 from a client via the User Feedback API?",
+      "choices": [
+        "Directly attach feedback to Spans/Sessions and aggregate it as quality metrics",
+        "Roll back RDS transactions whenever a user provides feedback on application UI",
+        "Mute the RUM Session Replay microphone feature in response to user feedback",
+        "Trigger automatic redeployment of the corresponding AWS Lambda upon feedback"
+      ],
+      "explanation": "User Feedback connects with Evaluations to build a quality dashboard."
+    },
+    "agent_2_e": {
+      "question": "What is the value of observing Prompt Templates / Versioning?",
+      "choices": [
+        "Comparing quality, cost, and latency before and after prompt changes is easier",
+        "Inference GPUs are automatically scaled up and performance improves ignoring cost",
+        "The DNS cache is dynamically expanded and prompt resolution speed improves",
+        "Full prompts are auto-saved to an S3 bucket and become publicly viewable"
+      ],
+      "explanation": "Tagging prompt versions enables A/B comparison and regression detection."
+    },
+    "agent_2_f": {
+      "question": "Which is especially useful to record as a Span when observing retrieval quality in a RAG app?",
+      "choices": [
+        "Document IDs / scores / hit counts produced during the retrieval step",
+        "Change history of the load balancer (LB) target group configuration",
+        "TTL values of DNS records and how they changed in a short timeline",
+        "The currently preferred TLS cipher suite versions configured on ELBs"
+      ],
+      "explanation": "Recording document info on retrieval spans makes hallucination root-cause analysis practical."
+    },
+    "agent_3_a": {
+      "question": "What is important to correctly express call hierarchy in multi-agent workflows?",
+      "choices": [
+        "Propagate trace context to child calls and structure with appropriate Span kinds",
+        "Force-collapse every agent into a single process linked only by function calls",
+        "Encrypt every prompt body so it is excluded from observability targets",
+        "Run all agents on the same fixed IP address so they live together on the same node"
+      ],
+      "explanation": "trace context propagation and appropriate Span kinds expose causal relations among agents."
+    },
+    "agent_3_b": {
+      "question": "What is the best purpose of continuously evaluating 'Failure-to-Answer' in LLM Observability?",
+      "choices": [
+        "Detect hard-to-answer question patterns and signal Retrieval/prompt improvements",
+        "Continuously compress all LLM call costs down to zero with auto cost optimization",
+        "Automatically encrypt user IDs on failure to fully prevent personal identification",
+        "Continuously scale up inference GPUs and replace hardware whenever failures occur"
+      ],
+      "explanation": "Failure-to-Answer evaluations highlight knowledge gaps and prompt issues, serving as a continuous KPI."
+    },
+    "agent_3_c": {
+      "question": "Which other feature should be combined with LLM Observability to enforce PII masking thoroughly?",
+      "choices": [
+        "Sensitive Data Scanner (SDS) masking input/output values for PII",
+        "Dynamic VPC route table rewrites so PII-bearing requests take a separate path",
+        "Continuous invalidation of the DNS cache to physically block PII name resolution",
+        "Completely disable the RUM SDK so the browser stops sending any telemetry at all"
+      ],
+      "explanation": "Combining with SDS can replace/hash PII in prompts and responses for compliance."
+    },
+    "agent_3_d": {
+      "question": "Which is best practice to keep LLM-as-a-judge Evaluations reliable?",
+      "choices": [
+        "Fix the evaluator model/prompt and combine sampling with human spot-checks",
+        "Randomize the evaluation prompt daily to maximize diversity of evaluation outputs",
+        "Abandon the evaluator model entirely and replace it with a random dice-roll judge",
+        "Skip sampling entirely and verify 100% of production results via manual human review"
+      ],
+      "explanation": "Fix the judge prompt/model, sample, and calibrate with human spot checks to ensure reliability."
+    },
+    "agent_3_e": {
+      "question": "Which move best balances 'cost down 50% while preserving quality' and is most measurable in LLM Observability?",
+      "choices": [
+        "A/B prompt-shortening or model switching and comparing quality Evaluations and cost",
+        "Add more DB indexes to make queries faster and indirectly bring down LLM costs",
+        "Extend DNS cache TTL so name resolution is reused and reduces LLM call counts",
+        "Stop running Synthetic Tests so the total number of LLM API calls drops to zero"
+      ],
+      "explanation": "Side-by-side dashboards of Evaluations + Cost make A/B comparisons feasible to find cost-quality sweet spots."
+    },
+    "cicd_1_a": {
+      "question": "What can Datadog CI Visibility visualize?",
+      "choices": [
+        "CI pipeline duration, failure rate, and ownership team relations",
+        "Cache hit rate observed at CDN edges with geographic distribution",
+        "Exact OS version strings collected from the fleet of monitored servers",
+        "Aggregate organization-wide reports on each user's MFA enablement status"
+      ],
+      "explanation": "CI Visibility ingests pipeline data from GitHub Actions, CircleCI, GitLab, and more."
+    },
+    "cicd_1_b": {
+      "question": "What is the main purpose of Test Visibility?",
+      "choices": [
+        "Identify flaky and slow tests to improve CI quality over time",
+        "Manage the change history of rules in a Web Application Firewall",
+        "Manage scheduled automatic backups of an RDS database service",
+        "Manage SSL certificate expiry rotation attached to an ELB target"
+      ],
+      "explanation": "Test Visibility identifies flaky/slow tests and failure patterns to streamline CI."
+    },
+    "cicd_1_c": {
+      "question": "What is the goal of Deployment Tracking?",
+      "choices": [
+        "Compare metric changes before and after a deployment to assess impact",
+        "Automatically approve future deployment budget requests via workflow",
+        "Stop GitHub from generating release tags on a per-deployment basis",
+        "Trigger automatic database rollbacks when a deployment fails to pass"
+      ],
+      "explanation": "Deployment markers correlate with error rate / latency changes to surface deployment impact."
+    },
+    "cicd_1_d": {
+      "question": "Which is a correct basic element of a 'Pipeline' event collected by Datadog?",
+      "choices": [
+        "pipeline / status / duration / repo / branch / commit",
+        "Pizza topping varieties and size-based sales aggregated per store",
+        "GPU VRAM capacity and current usage per second for each server",
+        "Printer paper remaining and monthly print volume per department"
+      ],
+      "explanation": "Pipeline events carry name/status/duration/repo/branch/commit and similar metadata."
+    },
+    "cicd_1_e": {
+      "question": "Which is included under Test Optimization?",
+      "choices": [
+        "Flaky Test Management / ITR / Early Flake Detection and similar",
+        "Auto-tuning DNS server TTLs in response to network load shifts",
+        "Auto-tuning DB indexes according to query usage patterns analysis",
+        "Optimizing server rack air conditioning at on-prem data centers"
+      ],
+      "explanation": "Test Optimization is a product family bundling flaky management, ITR, EFD, and more."
+    },
+    "cicd_2_a": {
+      "question": "What is the typical way to send pipeline info to Datadog CI?",
+      "choices": [
+        "Integrate the datadog-ci CLI or the official CI integration into the pipeline",
+        "Restart the RDS database via cron and extract CI metrics from the binlog",
+        "Enable AWS S3 Intelligent-Tiering so CI logs are automatically collected",
+        "Shorten DNS TTL to one second so CI server states are pushed to Datadog"
+      ],
+      "explanation": "datadog-ci CLI or each provider's official integration sends Job/Pipeline events."
+    },
+    "cicd_2_b": {
+      "question": "Which is Datadog's representative default signal for declaring a test 'flaky'?",
+      "choices": [
+        "Tests that show both pass and fail outcomes within the same commit/branch",
+        "Tests whose execution time is one millisecond or less and finish too fast",
+        "Tests whose source code contains the literal string 'flaky' as a comment",
+        "Tests whose PR title contains the string 'flaky' as a manual annotation"
+      ],
+      "explanation": "Pass/fail variability within the same commit/branch is the typical default flaky signal."
+    },
+    "cicd_2_c": {
+      "question": "Which describes the effect of Test Quarantine correctly?",
+      "choices": [
+        "Isolates flaky tests so they no longer fail the pipeline, while still running",
+        "Physically removes every test from the repository so the CI is always green",
+        "Runs every test twice and uses majority voting to flatten result variability",
+        "Encrypts test bodies to prevent edits, suppressing flaky behavior overall"
+      ],
+      "explanation": "Quarantined tests still run and remain visible but no longer cause CI failure."
+    },
+    "cicd_2_d": {
+      "question": "What does Datadog Code Analysis (Static Analysis) detect?",
+      "choices": [
+        "Lint / security / code-quality rule violations",
+        "Continuous detection of missing fragments in RDS binlogs",
+        "Parsing DNS TTL values misconfigured as too short or long",
+        "Statistics of paper jams happening on office printers daily"
+      ],
+      "explanation": "Datadog Static Analysis can run multi-language lint/security/quality rules in CI."
+    },
+    "cicd_2_e": {
+      "question": "Which tags are important to link Deployment Tracking with a service?",
+      "choices": [
+        "env / service / version of Unified Service Tagging",
+        "owner / retain / mfa related to access-permission management",
+        "browser / screen_resolution / fps used in RUM client context",
+        "Just stage / lambda_arn / region used in serverless deployments"
+      ],
+      "explanation": "Unified Service Tagging (env/service/version) accurately links deployment markers to services."
+    },
+    "cicd_2_f": {
+      "question": "Which is the basic way to send GitHub Actions runs to CI Visibility accurately?",
+      "choices": [
+        "Use the official Datadog GitHub integration / webhook to send events and datadog-ci for test reports",
+        "Stop GitHub Actions execution via cron and only notify Datadog about scheduled stop events",
+        "Forward all GitHub webhooks to Google Mail and infer the CI state from labels in the inbox",
+        "Scrape the static HTML published on GitHub Pages to indirectly extract CI run information"
+      ],
+      "explanation": "The official integration captures Pipeline events; datadog-ci uploads test reports."
+    },
+    "cicd_3_a": {
+      "question": "Which is a correct outcome of enabling Intelligent Test Runner (ITR)?",
+      "choices": [
+        "Runs only tests related to the changed code based on a coverage map and shortens CI time",
+        "Directly deploys test code into the production environment so staging becomes unnecessary",
+        "Stops running every test completely so that the CI execution wall time drops to zero",
+        "Runs every test in twice the parallelism so the wall time becomes exactly twice as long"
+      ],
+      "explanation": "ITR skips tests unrelated to the changed code based on coverage to shorten CI time."
+    },
+    "cicd_3_b": {
+      "question": "Which describes the typical mechanism of Early Flake Detection (EFD)?",
+      "choices": [
+        "Re-runs new/modified tests multiple times and judges stability to detect flakiness early",
+        "Encrypts every test in the repository and runs them in parallel inferring flakiness",
+        "Analyzes the JavaScript bundle compression ratio and indirectly judges flakiness",
+        "Repeatedly clears the DNS cache to intentionally increase variability for detection"
+      ],
+      "explanation": "EFD re-runs new/changed tests several times and detects flakiness early in the lifecycle."
+    },
+    "cicd_3_c": {
+      "question": "Which is the standard workflow to identify a deployment-induced incident fastest with CI Visibility?",
+      "choices": [
+        "Deployment Marker → confirm APM error rate spike → drill down to the matching CI Pipeline",
+        "Download all Logs to a developer's local laptop and search them manually with grep tools",
+        "Watch only RUM Session Replay videos in sequence to reproduce the deployment-induced fault",
+        "Continuously measure only DNS response time to indirectly infer whether an incident exists"
+      ],
+      "explanation": "Deployment Marker → APM error rate → drill into the affected Pipeline/commit is the standard RCA path."
+    },
+    "cicd_3_d": {
+      "question": "Which is the prerequisite for Test Impact Analysis (the foundation of ITR)?",
+      "choices": [
+        "Recording coverage during test execution to build the test↔code dependency map",
+        "Fixing the test parallelism to 1 and running every test sequentially in a single thread",
+        "Zipping the git repository every night and archiving it to external storage as a backup",
+        "Taking an application DB snapshot every night and inferring test targets from snapshots"
+      ],
+      "explanation": "ITR relies on coverage collected at test runtime to safely skip tests unrelated to the changed code."
+    },
+    "cicd_3_e": {
+      "question": "What is the main benefit of enabling Datadog's Source Code Integration?",
+      "choices": [
+        "Deep links from Errors / APM stack traces to the corresponding commit/line on GitHub etc.",
+        "Automatically tarballs git repositories and forwards them to external storage in a backup",
+        "Modifies the database DDL automatically when production incidents trigger schema fixes",
+        "Continuously auto-optimizes DNS cache TTLs to speed up APM trace name resolution lookups"
+      ],
+      "explanation": "Source Code Integration links version tags to the git repo, reducing MTTR on errors."
+    },
+    "slo_1_a": {
+      "question": "What is an SLO (Service Level Objective)?",
+      "choices": [
+        "A target value for the reliability a service aims to provide (e.g., 99.9%)",
+        "A threshold for the maximum number of concurrent connections a server can accept",
+        "An identifier that represents the current schema version of a database backend",
+        "A configurable setting for how long logs are retained before being deleted"
+      ],
+      "explanation": "An SLO is a target value (e.g., 99.9% success) for an SLI (indicator)."
+    },
+    "slo_1_b": {
+      "question": "Which is the correct definition of Error Budget?",
+      "choices": [
+        "An allowance of failure equal to 100% − SLO (e.g., 0.1% for 99.9%)",
+        "A bookkeeping tag used merely for grouping budgets in finance reporting",
+        "A development budget reserved for cutting a release tag on GitHub repos",
+        "An estimated cost of capturing RUM sessions during a billing period"
+      ],
+      "explanation": "100% − SLO is the Error Budget, the allowable amount of failure."
+    },
+    "slo_1_c": {
+      "question": "What is an SLI (Service Level Indicator)?",
+      "choices": [
+        "A concrete metric to measure reliability (e.g., successful requests / total requests)",
+        "Contact information for the team that should be paged first when incidents happen",
+        "The GitHub username of the engineer in charge of reviewing the service's code changes",
+        "The total number of read replicas of the RDS database used by the service backend"
+      ],
+      "explanation": "An SLI is the concrete formula (availability, latency, etc.) used to measure the target."
+    },
+    "slo_1_d": {
+      "question": "Which is the correct difference between an SLA and an SLO?",
+      "choices": [
+        "An SLA is a contractual quality commitment; an SLO is an internal target",
+        "They are exact synonyms with identical behavior and there is no real difference",
+        "An SLO is defined by national law and cannot be edited by the organization at all",
+        "An SLA is a contract document and never involves uptime or other technical metrics"
+      ],
+      "explanation": "SLA is contractual; SLO is internal and typically stricter."
+    },
+    "slo_1_e": {
+      "question": "What does the Datadog SLO Status widget primarily display?",
+      "choices": [
+        "Attainment, remaining Error Budget, and trend graphs for the SLO",
+        "A global popularity ranking of programming languages used by developers",
+        "The total count of unfinished tickets remaining in the JIRA backlog",
+        "Per-host OS patch status with a count of un-patched known vulnerabilities"
+      ],
+      "explanation": "The SLO widget shows attainment, remaining Error Budget, and burn rate."
+    },
+    "slo_2_a": {
+      "question": "What is the essential difference between Metric-based SLO and Monitor-based SLO?",
+      "choices": [
+        "Metric-based computes from time-series queries (good/total); Monitor-based computes from monitor state history (uptime)",
+        "They are completely synonymous and only the names differ in the UI; the internals and outputs are identical in every way",
+        "Monitor-based SLO is exclusive to LLM Observability and cannot be applied to APM, infrastructure, or any other metrics",
+        "Metric-based SLO can only be applied to APM-derived metrics and never works with infrastructure or log-derived data sources"
+      ],
+      "explanation": "Metric-based uses numeric queries; Monitor-based uses monitor history (alert/ok) to compute attainment."
+    },
+    "slo_2_b": {
+      "question": "What does a Burn Rate of '2x' mean?",
+      "choices": [
+        "Continuing at this rate would exhaust the Error Budget in half the SLO window",
+        "The Error Budget is automatically doubled, allowing twice the usual failure rate",
+        "The SLO target is manually rewritten to twice the strictness of the current value",
+        "The monitor is internally re-evaluated at twice the usual frequency by Datadog"
+      ],
+      "explanation": "Burn Rate = actual failure rate / allowed failure rate; 2x consumes the budget in half the window."
+    },
+    "slo_2_c": {
+      "question": "What is the difference between 'rolling' and 'calendar' Time Window SLOs?",
+      "choices": [
+        "Rolling is a trailing window of N days; calendar is a fixed window like 'month to date'",
+        "They are exact synonyms with the same measurement method and same reset timing always",
+        "Calendar SLO can only be applied to APM trace data and never to logs or infrastructure",
+        "Rolling SLO is exclusive to Logs-derived data and cannot be used with metrics-derived SLIs"
+      ],
+      "explanation": "Rolling is a trailing window; calendar is a fixed window like 'beginning of month'."
+    },
+    "slo_2_d": {
+      "question": "What is a typical way to express 'p99 of requests under 300ms' as an SLO?",
+      "choices": [
+        "Metric-based SLO with good = (requests ≤ 300ms) and total = (all requests)",
+        "Monitor-based SLO that only observes Burn Rate without using any request counts",
+        "Take Logs status-code counts and balance the ratio differently as a substitute",
+        "Reuse CI test pass rates as a stand-in for measuring production latency SLOs"
+      ],
+      "explanation": "Use a ratio of qualifying requests / total requests as a Metric-based SLO."
+    },
+    "slo_2_e": {
+      "question": "Which is the most appropriate benefit of SLO Burn Rate Alerts?",
+      "choices": [
+        "Notify early, before the Error Budget is exhausted, when the consumption pace is abnormal",
+        "Allow the configured monitor to be muted permanently with a single-time setup convenience",
+        "Continuously save Logs storage and significantly reduce the organization's monthly cost",
+        "Speed up DNS resolver responses and improve the latency of every website request made"
+      ],
+      "explanation": "Burn Rate alerts catch fast budget consumption early, reducing incident response time."
+    },
+    "slo_2_f": {
+      "question": "Which is a correct caveat about the 'Good/Total' SLO model?",
+      "choices": [
+        "Without clearly defining the Good denominator (target population), the value cannot be trusted",
+        "The Total count is always fixed at 1 so only relative values can ever be handled in practice",
+        "The Good count is auto-converted to be synonymous with p95 instead of being treated as a count",
+        "Dividing good/total in a time series guarantees that every tag is preserved on the output by design"
+      ],
+      "explanation": "Without a clearly defined target population (exclusions, health-check filters), the SLO loses trust."
+    },
+    "slo_3_a": {
+      "question": "Which is a typical example for designing Multi-window / Multi-burn-rate Alerts on a 30-day 99.9% SLO?",
+      "choices": [
+        "Combine short (e.g., 5min / 1h) and long (e.g., 1h / 6h) windows and page when both burn rates exceed thresholds",
+        "Use only a single 1-hour window with a single fixed threshold alert and avoid combining any multiple windows",
+        "Evaluate every second and notify instantly for every single anomaly, prioritizing immediacy above all considerations",
+        "Remove the Error Budget concept entirely from alerts and notify based solely on absolute SLO attainment value"
+      ],
+      "explanation": "Combining short and long windows (Google SRE style) reduces false positives and negatives."
+    },
+    "slo_3_b": {
+      "question": "Which is the best advantage of a Composite SLO (combining multiple SLOs)?",
+      "choices": [
+        "Evaluate the 'composite reliability' of a higher service by logically composing dependent SLOs",
+        "The Error Budget is automatically doubled with no definition and each service's budget always has surplus",
+        "Target monitors are auto-generated from the UI, completely skipping the SRE review of monitor design",
+        "Every service in the organization must collapse into a single huge SLO, removing all individual SLOs"
+      ],
+      "explanation": "Composite SLOs compute the reliability of higher-level user journeys from dependent SLOs."
+    },
+    "slo_3_c": {
+      "question": "What is the typical meaning of choosing p99 instead of p95 for a Latency SLO?",
+      "choices": [
+        "Stricter on tail experience but Error Budget consumption is more sensitive to outliers",
+        "The Error Budget is automatically doubled and consumption is always halved as a guarantee",
+        "RUM no longer supports p99 collection, so the SLI becomes impossible to derive from RUM data",
+        "The SLO must be switched to a Monitor-based computation and Metric-based is no longer allowed"
+      ],
+      "explanation": "p99 is more sensitive to tail experience but is more volatile due to outliers."
+    },
+    "slo_3_d": {
+      "question": "What is the right purpose of narrowing the SLO target population (qualifier)?",
+      "choices": [
+        "Exclude noise (bots, health checks) and define a true reliability metric focused on end-user experience",
+        "Mute every target monitor entirely so the SLO attainment value is artificially fixed at exactly 100% always",
+        "Add a large number of tags intentionally to increase storage cost and use it as an internal budget consumption signal",
+        "Design alerts so that notifications reach no one, codifying it as a hidden SRE best practice for the organization"
+      ],
+      "explanation": "Qualifiers focus the SLI on real user experience by excluding noise."
+    },
+    "slo_3_e": {
+      "question": "Which is typical content of an Error Budget Policy?",
+      "choices": [
+        "Code of conduct like feature freezes, mandatory postmortems, and SRE/dev rebalancing on budget breach",
+        "Copies of Datadog API Keys placed into every developer's browser localStorage for ease of access at runtime",
+        "A simple operational rule limited to auto-assigning severity labels to every alert and nothing else at all",
+        "Permanently muting every monitor in the organization the instant any SLO violation is detected by automation"
+      ],
+      "explanation": "Error Budget Policies are organizational rules restricting risky actions when the budget is consumed."
+    },
+    "int_1_a": {
+      "question": "What is the typical way to enable a new Integration with the Datadog Agent?",
+      "choices": [
+        "Edit conf.d/<integration>.d/conf.yaml and restart the Datadog Agent",
+        "Change the schema of the target database and add a new table to enable",
+        "Re-package the AWS Lambda function and republish it as a layer to enable",
+        "Clear the OS-level DNS cache forcibly so the integration becomes active"
+      ],
+      "explanation": "Placing YAML under conf.d enables the integration."
+    },
+    "int_1_b": {
+      "question": "What is 'automatic instrumentation'?",
+      "choices": [
+        "Mechanism to get APM traces, etc., without modifying application code",
+        "The Datadog Agent automatically optimizes the host CPU usage in the OS",
+        "AI automatically generates RUM sessions and uses them as test scenarios",
+        "Synthesized voice reads out every emitted log message as an operations aid"
+      ],
+      "explanation": "Single Step Instrumentation and similar features enable auto-instrumented tracing without code changes."
+    },
+    "int_1_c": {
+      "question": "What is the primary use of the 'Webhook' integration?",
+      "choices": [
+        "Forward events such as alerts to an arbitrary HTTP endpoint of your choice",
+        "Send a command that physically cools the host CPU using its rotation fans",
+        "Provide a mechanism to dynamically shard RDS for distributing query load",
+        "Act as a DNS resolver proxy so Datadog handles name resolution traffic"
+      ],
+      "explanation": "Webhooks pass Datadog events to any system (Slack/JIRA/PagerDuty, etc.)."
+    },
+    "int_1_d": {
+      "question": "What is the basic purpose of DogStatsD?",
+      "choices": [
+        "Protocol to send custom metrics from apps to the Agent over UDP/UDS",
+        "Client API to write proprietary data into the browser's cookie storage",
+        "A replication feature that collects DB binlog data continuously to Datadog",
+        "A CLI tool that forcibly flushes the OS-level DNS resolver cache buffer"
+      ],
+      "explanation": "DogStatsD is a StatsD-compatible protocol enabling SDKs in many languages to send custom metrics."
+    },
+    "int_1_e": {
+      "question": "Which three keys are required by Unified Service Tagging?",
+      "choices": [
+        "env / service / version",
+        "owner / secret / env",
+        "stage / region / tenant",
+        "team / customer / level"
+      ],
+      "explanation": "env/service/version stitch together metrics, logs, and traces consistently."
+    },
+    "int_2_a": {
+      "question": "What is the typical way to collect CloudWatch metrics via the AWS-Datadog integration?",
+      "choices": [
+        "Set up Datadog AWS Integration via an IAM role (cross-account role)",
+        "Install the deprecated Python 2 interpreter on EC2 and manually push values",
+        "Intentionally make S3 buckets public and let external tools scrape them",
+        "Manually add an A record to Route53 to enable CloudWatch metrics collection"
+      ],
+      "explanation": "The AWS Integration uses a cross-account IAM role to fetch CloudWatch metrics, etc."
+    },
+    "int_2_b": {
+      "question": "Which is a correct way to send telemetry to Datadog via OpenTelemetry?",
+      "choices": [
+        "Send via the Datadog Agent with OTLP receiver enabled, or via the OTel Collector's Datadog exporter",
+        "Write OTLP data directly into RDS and then have a separate tool extract it later to forward to Datadog",
+        "POST OTel telemetry as image data via a Webhook into the Datadog UI for later processing as needed",
+        "Send OTLP messages directly to the RUM server which would transform them into APM traces on the fly"
+      ],
+      "explanation": "Agent can listen for OTLP, or the OTel Collector can use the Datadog exporter."
+    },
+    "int_2_c": {
+      "question": "What is the benefit of using the Datadog Extension Layer for AWS Lambda observation?",
+      "choices": [
+        "Aggregate metrics/logs/traces locally inside Lambda and forward without an external forwarder",
+        "Make Lambda functions persistent processes that eliminate cold starts in some magical way always",
+        "Force the Lambda runtime to be JVM so that no language other than Java can ever execute on Lambda",
+        "Speed up DNS resolution from inside Lambda functions and only optimize external API call latencies"
+      ],
+      "explanation": "The Extension acts like an in-function Agent, optimizing per-invocation latency and consolidating sends."
+    },
+    "int_2_d": {
+      "question": "Which command enables auto-instrumentation for Python WSGI/ASGI frameworks?",
+      "choices": [
+        "ddtrace-run <your_command> (or evaluate 'import ddtrace.auto' at startup)",
+        "Run 'pip uninstall ddtrace' first and then start the app to enable instrumentation",
+        "Set the environment variable datadog disable=true so instrumentation paradoxically begins",
+        "Run 'yarn add ddtrace' and the Python app would magically be instrumented automatically"
+      ],
+      "explanation": "ddtrace-run enables auto-patching at startup; 'import ddtrace.auto' works too."
+    },
+    "int_2_e": {
+      "question": "Where do you specify the target Beans for the JMX Integration (JMXFetch)?",
+      "choices": [
+        "instances and include settings in conf.d/jmx.d/conf.yaml",
+        "Only via environment variables in the JRE without editing any conf.yaml file at all",
+        "Inside the OS-level /etc/hosts file by listing Bean names line by line individually",
+        "By writing the Bean paths into the DNS SOA record so JMXFetch picks them up"
+      ],
+      "explanation": "Specify hosts via instances and target Beans via include/exclude in JMX Integration config."
+    },
+    "int_2_f": {
+      "question": "Which processors can you use to parse logs in a Logs Pipeline?",
+      "choices": [
+        "Grok Parser / JSON Parser / Geo IP Parser / Lookup Processor",
+        "RUM Recorder / Synthetic Test Engine / DOM Replay Generator",
+        "S3 Lifecycle Rule / EBS Snapshot Scheduler / EFS Replicator",
+        "DNS Forwarder / ACME Issuer / SMTP Relay / NTP Synchronizer"
+      ],
+      "explanation": "Logs Pipelines structure and enrich logs via Grok/JSON/GeoIP/Lookup processors."
+    },
+    "int_3_a": {
+      "question": "What is the benefit of using Admission Controller-based Auto Instrumentation in Kubernetes?",
+      "choices": [
+        "Tracers are auto-injected at Pod creation, so neither code changes nor rebuilds are required at all",
+        "DB queries are automatically rewritten by the Datadog Admission Controller for dramatic optimization",
+        "Auto Instrumentation has the side-effect that the host operating system overall performance massively improves",
+        "Every Pod is forced onto a single specific node so all resources concentrate on exactly one machine in the cluster"
+      ],
+      "explanation": "The Cluster Agent's admission controller injects init containers and env vars for codeless tracing."
+    },
+    "int_3_b": {
+      "question": "What is the typical configuration for using Single Step Instrumentation (SSI) on hosts (non-k8s)?",
+      "choices": [
+        "The Agent detects the language runtime automatically and injects the tracer via an LD_PRELOAD-like mechanism",
+        "GitHub webhooks are forwarded to each developer's local machine and from there instrumentation is enabled",
+        "Rewrite every monitored service in C++ and recompile from scratch as a strict mandatory prerequisite condition",
+        "Reindex the database's tables so that the Agent indirectly identifies where to instrument inside the application"
+      ],
+      "explanation": "SSI automates attaching the tracer to detected runtimes (SSI host mode)."
+    },
+    "int_3_c": {
+      "question": "If service or env tags are not reflected on Datadog when using OTel Collector + Datadog Exporter, what should you check?",
+      "choices": [
+        "resource attributes (service.name, etc.) and the exporter's hostname_source / tag mapping",
+        "The OS Wi-Fi connection settings (SSID and password) which should be confirmed first as a top priority",
+        "Whether the application database index rebuild is in progress should be checked before anything else",
+        "Just verify only the DNS TTL value; Collector or Exporter configuration has nothing to do with the issue"
+      ],
+      "explanation": "Verify that OTel resource attributes map to Datadog's service/env tags correctly."
+    },
+    "int_3_d": {
+      "question": "Why is Admission Controller auto-instrumentation often preferred over Sidecar Agents?",
+      "choices": [
+        "Avoids the per-Pod resource overhead and operational complexity that sidecars introduce",
+        "Every Pod is automatically exposed via an external load balancer when this approach is used",
+        "Liveness and readiness probes can be removed entirely from Pod specs to simplify configuration",
+        "The number of nodes in the monitored cluster can be reduced to zero offering extreme cost savings"
+      ],
+      "explanation": "Sidecars add a container per Pod; admission controllers centralize via the Cluster Agent."
+    },
+    "int_3_e": {
+      "question": "Which is the approach to collect AWS Integration metrics with minimal delay?",
+      "choices": [
+        "Send via CloudWatch Metric Streams (Firehose) for near-real-time delivery to Datadog",
+        "A cost-leaning operation that pushes metrics in a once-a-day batch via a Cron-driven job",
+        "Stage metrics first into S3 Infrequent Access tier and re-ingest into Datadog two weeks later",
+        "Rely solely on Route53 health checks as a substitute for collecting CloudWatch metrics directly"
+      ],
+      "explanation": "Metric Streams (Firehose) provides near-real-time CloudWatch metrics, lower latency than polling."
+    },
+    "int_3_f": {
+      "question": "What is a typical scenario for using Datadog API/App keys via API/CLI rather than the UI?",
+      "choices": [
+        "Declaratively manage Monitor / Dashboard / SLO / Pipeline using the Terraform Provider or datadog-ci",
+        "Directly toggle EC2 instance physical power ON/OFF within the AWS account from Datadog as an automation workflow",
+        "Apply production RDS DDL (CREATE TABLE / ALTER TABLE, etc.) via Datadog as a centralized change-management script",
+        "Automate the delegation of a domain managed in Route53 to a separate DNS provider entirely via the Datadog API"
+      ],
+      "explanation": "The Terraform Datadog Provider or datadog-ci is commonly used to manage Monitors/Dashboards/SLOs as code."
+    },
+    "boss_1": {
+      "question": "[Boss] To achieve 'ingest 100% of spans while retaining only important traces long-term' at APM scale, which combination is canonical?",
+      "choices": [
+        "Use Ingestion Control (head-based sampling) to limit intake AND Retention Filters to index high-priority traces (errors, slow, etc.) for long-term keeping",
+        "First write all spans to local files inside each app as gzip-compressed dumps, then cron-push them to S3 buckets at intervals to mitigate the storage problem somehow",
+        "Encrypt entire RUM sessions with a proprietary key, hoping the resulting side-effects would somehow lower the long-term storage cost of APM as a consequence",
+        "Write all spans first as MySQL binlog entries, then aggregate them externally with a separate tool, and finally re-ingest the processed results into Datadog APM"
+      ],
+      "explanation": "Head-based controls intake; Retention Filters keep priority traces (errors/slow) long-term."
+    },
+    "boss_2": {
+      "question": "[Boss] How do you block login brute-force attacks in real time AND reflect them in the threat score using ASM?",
+      "choices": [
+        "Instrument set_user / track_login_event with the ddtrace ASM API and use Detection Rules to block users/IPs in real time via block_* APIs when thresholds are exceeded",
+        "Periodically take snapshots of the target database and treat that operation alone as the entire incident response, choosing not to add any additional protective measures",
+        "Continuously flush DNS caches on the OS or Pods, disrupting attacker name resolution and thereby rendering the brute-force attack practically ineffective as a side-effect",
+        "Completely disable the RUM SDK running in browsers so that attack-related logs are no longer collected, eliminating the burden of detection and response altogether by design"
+      ],
+      "explanation": "ASM learns attacker behavior from user/login event instrumentation and can block them."
+    },
+    "boss_3": {
+      "question": "[Boss] What is the most important principle when designing a true user-experience SLI for an SLO?",
+      "choices": [
+        "Clearly define the target population (qualifier), carefully excluding noise such as synthetic traffic and internal health-check probes",
+        "Aggregate every single production request without distinguishing successes from failures into one SLI to keep the attainment looking artificially high in dashboards",
+        "Always use only the absolute maximum value (p100) for latency SLIs and never use percentiles such as p95 or p99 under any circumstance whatsoever",
+        "Declare that every SLO across the entire organization must be Monitor-based and prohibit the use of the Metric-based computation method as an organizational policy"
+      ],
+      "explanation": "Clarifying the qualifier and target population is the most critical SLI design principle, removing noise."
+    },
+    "boss_4": {
+      "question": "[Boss] Which is an appropriate MLOps loop for continuously detecting quality regression in an LLM app?",
+      "choices": [
+        "Sample from production Spans → run Evaluations → curate failure patterns into Datasets → refine prompts/models → re-measure and compare continuously",
+        "Simply write all data into local log files and store them, never building any further continuous evaluation or improvement loop on top of the collected data",
+        "Rebuild the indexes of the database used by the target application every night, hoping that this would indirectly cause LLM output quality to continuously improve",
+        "Archive RUM Session Replay video files of every session into ZIP archives for long-term retention, and treat that alone as sufficient continuous quality monitoring"
+      ],
+      "explanation": "Observe → evaluate → dataset → refine → re-measure: the LLM Obs loop accelerates quality drift mitigation."
+    },
+    "boss_5": {
+      "question": "[Boss] Which combination of features lets you trace a deployment-induced production incident back to the commit level?",
+      "choices": [
+        "Deployment Marker (env/service/version) + Source Code Integration + CI Visibility (Pipeline / Test reports) combined",
+        "Rely solely on a fully-automated defense script that reverts every currently-open PR in the repository the moment a production incident happens",
+        "Shorten the DNS TTL to one second across the board so that even if a deployment-induced incident occurs you can immediately switch back to a safe state",
+        "Periodically delete all Logs to minimize the history footprint, accepting that commit-level traceability is given up in favor of focusing only on post-mortem recovery"
+      ],
+      "explanation": "Deployment Marker → Source Code Integration → CI Visibility lets you walk back to the commit/Pipeline."
+    },
+    "boss_6": {
+      "question": "[Boss] Which is the most appropriate tag strategy to reduce observation noise in production Kubernetes?",
+      "choices": [
+        "Enforce Unified Service Tagging and treat high-cardinality values like user IDs as span/log attributes instead of tags",
+        "Continuously rename every Pod to a completely random string in an attempt to maintain tag uniqueness as an aggressive operational practice",
+        "Abandon the tagging mechanism entirely and instead identify service boundaries solely via file name and Pod name suffix conventions for everything",
+        "Impose no rule whatsoever on the number or types of tags used, and openly declare that you can freely add as many tag types as you can think of without bound"
+      ],
+      "explanation": "Reduce cardinality risk with Unified Service Tagging; IDs belong in attributes, not tags."
+    },
+    "boss_7": {
+      "question": "[Boss] Which is a correct trade-off between adopting the OTel SDK and adopting the Datadog tracer?",
+      "choices": [
+        "OTel offers strong vendor neutrality with vendor-specific features depending on exporter; Datadog tracer is optimized with deeper integration to Profiler / ASM / CI",
+        "Both are implementations and feature sets that are completely identical, and the documentation merely uses different names while referring to the very same software in reality",
+        "Adopting the OTel SDK technically makes it completely impossible to send any telemetry to Datadog, as a strict and explicit limitation documented inside the OTel ecosystem",
+        "The Datadog tracer itself is provided only as a closed proprietary binary blob and its source code is not publicly available anywhere outside the vendor's internal repositories"
+      ],
+      "explanation": "OTel is neutral; Datadog tracer is more optimized and tightly integrated. They can be combined."
+    },
+    "boss_8": {
+      "question": "[Boss] Which is a reasonable implementation to add custom attributes in RUM while masking PII?",
+      "choices": [
+        "Pass context to addAction/addError, mask via Sensitive Data Scanner on the server, and pre-filter on the client side via beforeSend hooks",
+        "Run the RUM SDK as a long-running server-side process so that no personal information can ever be transmitted from the browser-side telemetry stream at all",
+        "Save every piece of RUM data only into the browser's local storage and refrain entirely from sending any of it to the Datadog backend in any circumstance whatsoever",
+        "Embed personal data such as full names and email addresses directly into the URL query string of outgoing requests as the most simplistic and naive way of implementing this"
+      ],
+      "explanation": "beforeSend on the client + SDS on the server form a robust double defense for PII."
+    }
+  }
+}

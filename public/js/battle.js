@@ -4,10 +4,11 @@ const Battle = {
   state: null, // 'normal' | 'boss' | null
 
   // コールバック (game.js から差し込み)
-  onVictory: null,        // (enemyId) => void
-  onDefeat: null,         // () => void
+  onVictory: null,        // (enemyId, { correct }) => void  ※誤答でも撃破扱いで呼ばれる
   onBossDefeated: null,   // (stats) => void  - stats: { correctCount, totalCount }
   onAnswered: null,       // ({ correct, questionId }) => void
+  // 現在のセッション統計を返す関数 (game.jsからセット)
+  getStats: null,         // () => { correct, total, mistakes }
 
   current: null, // 現在のバトルコンテキスト
   ui: {
@@ -19,8 +20,8 @@ const Battle = {
     enemyFlavor: null,
     questionText: null,
     choicesEl: null,
-    hpBar: null,
-    hpText: null,
+    statCorrect: null,
+    statMistakes: null,
     bossProgress: null,
     normalProgress: null,
     modal: null,
@@ -38,8 +39,8 @@ const Battle = {
     this.ui.enemyFlavor = document.getElementById('enemy-flavor');
     this.ui.questionText = document.getElementById('question-text');
     this.ui.choicesEl = document.getElementById('choices');
-    this.ui.hpBar = document.getElementById('hp-bar-fill');
-    this.ui.hpText = document.getElementById('battle-hp');
+    this.ui.statCorrect = document.getElementById('battle-correct');
+    this.ui.statMistakes = document.getElementById('battle-mistakes');
     this.ui.bossProgress = document.getElementById('boss-progress');
     this.ui.normalProgress = document.getElementById('normal-progress');
     this.ui.modal = document.getElementById('modal');
@@ -48,10 +49,18 @@ const Battle = {
     this.ui.modalOk = document.getElementById('modal-ok');
 
     this.ui.modalOk.addEventListener('click', () => this.handleModalOk());
+    this.ui.modalOk.textContent = I18n.t('modal_next');
+  },
+
+  enemyName(typeKey) {
+    return I18n.t('enemy_' + typeKey) || ENEMY_TYPES[typeKey].name;
+  },
+  enemyFlavor(typeKey) {
+    return I18n.t('flavor_' + typeKey) || ENEMY_TYPES[typeKey].flavor;
   },
 
   // ====== 通常バトル ======
-  startNormal(enemy, hero) {
+  startNormal(enemy) {
     const def = ENEMY_TYPES[enemy.type];
     const question = QuestionBank.pickForEnemy(enemy.type, enemy.level);
 
@@ -60,49 +69,51 @@ const Battle = {
       enemy,
       enemyDef: def,
       question,
-      hero,
       answered: false
     };
 
+    const eName = this.enemyName(enemy.type);
+    const eFlavor = this.enemyFlavor(enemy.type);
     this.ui.enemySprite.textContent = def.bigEmoji || def.emoji;
     this.ui.enemySprite.style.color = def.colorByLevel[enemy.level];
     this.ui.enemySprite.classList.remove('hit', 'defeated');
-    this.ui.enemyName.textContent = def.name;
+    this.ui.enemyName.textContent = eName;
     this.ui.enemyLevel.textContent = LEVEL_LABEL[enemy.level];
-    this.ui.enemyCategory.textContent = QuestionBank.categoryLabel(question.category);
-    this.ui.enemyFlavor.textContent = `${def.name}(${LEVEL_LABEL[enemy.level]})があらわれた! ${def.flavor}`;
+    this.ui.enemyCategory.textContent = I18n.t('cat_' + question.category) || QuestionBank.categoryLabel(question.category);
+    this.ui.enemyFlavor.textContent = I18n.t('battle_appeared', { name: eName, lv: LEVEL_LABEL[enemy.level], flavor: eFlavor });
     this.ui.bossProgress.style.display = 'none';
     this.ui.normalProgress.style.display = 'inline';
-    this.ui.normalProgress.textContent = '通常戦';
+    this.ui.normalProgress.textContent = I18n.t('battle_mode_normal');
 
     this.renderQuestion(question);
-    this.updateHpUi();
+    this.updateStatsUi();
   },
 
   // ====== ボス戦 ======
-  startBoss(hero) {
+  startBoss() {
     const questions = QuestionBank.pickForBoss();
     this.current = {
       mode: 'boss',
       questions,
       qIndex: 0,
-      hero,
       answered: false,
       correctCount: 0
     };
 
+    const bName = I18n.t('boss_name');
+    const bFlavor = I18n.t('boss_flavor');
     this.ui.enemySprite.textContent = BOSS_SPRITE.bigEmoji;
     this.ui.enemySprite.style.color = '#fff';
     this.ui.enemySprite.classList.remove('hit', 'defeated');
-    this.ui.enemyName.textContent = BOSS_SPRITE.name;
-    this.ui.enemyLevel.textContent = 'BOSS';
-    this.ui.enemyCategory.textContent = '高度な問題';
-    this.ui.enemyFlavor.textContent = `${BOSS_SPRITE.name}が立ちはだかる! ${BOSS_SPRITE.flavor}`;
+    this.ui.enemyName.textContent = bName;
+    this.ui.enemyLevel.textContent = I18n.t('boss_progress');
+    this.ui.enemyCategory.textContent = I18n.t('boss_category');
+    this.ui.enemyFlavor.textContent = I18n.t('battle_boss_appeared', { name: bName, flavor: bFlavor });
     this.ui.bossProgress.style.display = 'inline';
     this.ui.normalProgress.style.display = 'none';
 
     this.advanceBoss();
-    this.updateHpUi();
+    this.updateStatsUi();
   },
 
   advanceBoss() {
@@ -111,8 +122,8 @@ const Battle = {
       // 全問終了
       this.showModal({
         kind: 'win',
-        title: '魔王ワン公を倒した!',
-        body: `見事に全${ctx.questions.length}問のうち${ctx.correctCount}問に正解!\nDatadog王国に光が戻った...`,
+        title: I18n.t('modal_boss_clear_title'),
+        body: I18n.t('modal_boss_clear_body', { total: ctx.questions.length, correct: ctx.correctCount }),
         onOk: () => {
           this.ui.enemySprite.classList.add('defeated');
           setTimeout(() => {
@@ -159,6 +170,7 @@ const Battle = {
     if (typeof this.onAnswered === 'function') {
       this.onAnswered({ correct, questionId: q.id });
     }
+    this.updateStatsUi();
 
     if (correct) {
       this.handleCorrect(q);
@@ -175,22 +187,23 @@ const Battle = {
       this.current.correctCount++;
       this.showModal({
         kind: 'correct',
-        title: 'こうげき せいこう!',
-        body: `せいかい!\n\n【解説】\n${q.explanation}`,
+        title: I18n.t('modal_boss_correct_title'),
+        body: I18n.t('modal_boss_correct_body', { ex: q.explanation }),
         onOk: () => {
           this.current.qIndex++;
           this.advanceBoss();
         }
       });
     } else {
+      const eName = this.enemyName(this.current.enemy.type);
       this.showModal({
         kind: 'correct',
-        title: 'てきを たおした!',
-        body: `せいかい!\n\n【解説】\n${q.explanation}\n\n${this.current.enemyDef.name}は しずかに しずんでいった...`,
+        title: I18n.t('modal_correct_title'),
+        body: I18n.t('modal_correct_body', { ex: q.explanation, name: eName }),
         onOk: () => {
           this.ui.enemySprite.classList.add('defeated');
           setTimeout(() => {
-            if (this.onVictory) this.onVictory(this.current.enemy.id);
+            if (this.onVictory) this.onVictory(this.current.enemy.id, { correct: true });
           }, 600);
         }
       });
@@ -198,54 +211,37 @@ const Battle = {
   },
 
   handleWrong(q) {
-    this.current.hero.hp = Math.max(0, this.current.hero.hp - 1);
-    this.updateHpUi();
-
-    if (this.current.hero.hp <= 0) {
-      this.showModal({
-        kind: 'wrong',
-        title: 'ゆうしゃ たおれる...',
-        body: `ふせいかい!\n正解は: ${this.current.mode === 'boss'
-          ? this.current.questions[this.current.qIndex].choices[q.answer]
-          : q.choices[q.answer]}\n\n【解説】\n${q.explanation}\n\nHPが0になった...`,
-        onOk: () => {
-          if (this.onDefeat) this.onDefeat();
-        }
-      });
-      return;
-    }
-
     if (this.current.mode === 'boss') {
       this.showModal({
         kind: 'wrong',
-        title: 'ボスの こうげき!',
-        body: `ふせいかい!\n正解は: ${q.choices[q.answer]}\n\n【解説】\n${q.explanation}\n\nHP -1`,
+        title: I18n.t('modal_boss_wrong_title'),
+        body: I18n.t('modal_boss_wrong_body', { ans: q.choices[q.answer], ex: q.explanation }),
         onOk: () => {
           this.current.qIndex++;
           this.advanceBoss();
         }
       });
     } else {
+      const eName = this.enemyName(this.current.enemy.type);
       this.showModal({
         kind: 'wrong',
-        title: 'てきの こうげき!',
-        body: `ふせいかい!\n正解は: ${q.choices[q.answer]}\n\n【解説】\n${q.explanation}\n\n敵は反撃した! HP -1`,
+        title: I18n.t('modal_wrong_title'),
+        body: I18n.t('modal_wrong_body', { ans: q.choices[q.answer], ex: q.explanation, name: eName }),
         onOk: () => {
-          // 通常戦は1問しかないので、敗北扱いで脱出
-          if (this.onDefeat) this.onDefeat({ retreat: true });
+          this.ui.enemySprite.classList.add('defeated');
+          setTimeout(() => {
+            if (this.onVictory) this.onVictory(this.current.enemy.id, { correct: false });
+          }, 600);
         }
       });
     }
   },
 
-  updateHpUi() {
-    const hp = this.current.hero.hp;
-    const max = this.current.hero.maxHp;
-    const pct = Math.max(0, (hp / max) * 100);
-    this.ui.hpBar.style.width = `${pct}%`;
-    if (pct <= 30) this.ui.hpBar.classList.add('low');
-    else this.ui.hpBar.classList.remove('low');
-    this.ui.hpText.textContent = `${hp}/${max}`;
+  updateStatsUi() {
+    if (!this.ui.statCorrect || !this.ui.statMistakes) return;
+    const stats = (typeof this.getStats === 'function') ? this.getStats() : { correct: 0, total: 0, mistakes: 0 };
+    this.ui.statCorrect.textContent = `${stats.correct}/${stats.total}`;
+    this.ui.statMistakes.textContent = `${stats.mistakes}`;
   },
 
   showModal({ kind, title, body, onOk }) {

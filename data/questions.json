@@ -16,9 +16,9 @@
       "question": "Datadog APMにおける「Trace」とは何ですか?",
       "choices": [
         "1つのリクエストがシステムを通過した記録(Spanの集合)",
-        "サーバーのCPU使用率の履歴",
-        "ログメッセージのリスト",
-        "アラート通知の履歴"
+        "1台のサーバーが収集したCPU使用率の時系列履歴",
+        "全アプリから出力された生ログメッセージのリスト",
+        "発火したアラート通知の送信履歴をまとめた一覧"
       ],
       "answer": 0,
       "explanation": "Traceは1つのリクエストがサービス間を横断した一連の処理(Span)の集合です。"
@@ -30,9 +30,9 @@
       "question": "Datadog RUM (Real User Monitoring)が監視する対象は?",
       "choices": [
         "実際のエンドユーザーのブラウザ/モバイル体験",
-        "サーバーのディスクI/O",
-        "Kubernetesのpod数",
-        "DBのスロークエリログのみ"
+        "ストレージサーバーのディスクI/O待機時間",
+        "Kubernetesクラスタ内で稼働中のpod総数",
+        "RDBMSのスロークエリログのみを収集対象とする"
       ],
       "answer": 0,
       "explanation": "RUMは実際のユーザーのブラウザ/モバイルアプリ上での体験(LCP, INP, クリック等)を計測します。"
@@ -43,10 +43,10 @@
       "level": 1,
       "question": "Spanに含まれない情報は次のうちどれ?",
       "choices": [
-        "ノートPCのバッテリー残量",
-        "操作名(operation name)",
-        "開始時刻と継続時間",
-        "親Spanへの参照"
+        "操作者のノートPCの内蔵バッテリー残量",
+        "操作名(operation name)とリソース識別子",
+        "Spanの開始時刻と継続時間(duration)",
+        "親Spanへの参照(parent span ID)"
       ],
       "answer": 0,
       "explanation": "Spanは操作名、リソース名、サービス名、時刻、タグ、親span関係などを持ちますが端末バッテリーは関係ありません。"
@@ -58,9 +58,9 @@
       "question": "APM の「Service」エンティティが表すのは?",
       "choices": [
         "同じ責務を持つアプリケーションの論理単位",
-        "ホスト1台ずつ",
-        "個別のリクエスト",
-        "Datadog Agentのバージョン"
+        "物理ホストやVMの1台ずつを示す単位",
+        "クライアントが送る個別のリクエスト",
+        "Datadog Agentの現在のバージョン文字列"
       ],
       "answer": 0,
       "explanation": "Serviceは「checkout-api」のような論理サービス単位で、複数ホスト/Podにまたがります。"
@@ -72,9 +72,9 @@
       "question": "RUMのSession Replayはどんな機能?",
       "choices": [
         "ユーザー操作を録画のように再生して確認できる",
-        "サーバーのログを書き戻す",
-        "DBのトランザクションをロールバック",
-        "CIパイプラインを巻き戻す"
+        "サーバー側のログを過去状態へ書き戻す機能",
+        "DBのトランザクションを自動ロールバックする",
+        "CIパイプラインの直近実行を巻き戻す機能"
       ],
       "answer": 0,
       "explanation": "Session ReplayでDOM変化を再生でき、UX上のバグを再現確認できます(PIIマスキング推奨)。"
@@ -86,10 +86,10 @@
       "level": 2,
       "question": "分散トレーシングでサービスAからサービスBへtrace contextを伝播する標準的なHTTPヘッダ群として正しいのは?",
       "choices": [
-        "x-datadog-trace-id / x-datadog-parent-id / x-datadog-sampling-priority(またはW3C traceparent)",
-        "Authorization と Set-Cookie のみ",
-        "User-Agent と Accept-Language",
-        "Content-Length のみ"
+        "x-datadog-trace-id / x-datadog-parent-id 等のDatadog固有ヘッダ群(または W3C traceparent)",
+        "AuthorizationヘッダとSet-Cookieヘッダだけでサービス間のSpan親子関係を直接表現し、専用ヘッダは一切付与しないと決める方式",
+        "User-AgentとAccept-Languageの内容を連結してハッシュ化し、その値をカスタムtrace IDとしてサービス間で相互に転送するという独自仕様",
+        "Content-LengthとTransfer-Encodingの2つだけでSpan階層を表現し、それ以外の追加ヘッダを一切送らずに分散トレースを完結させる方式"
       ],
       "answer": 0,
       "explanation": "Datadog独自のx-datadog-*ヘッダかW3C Trace Context(traceparent/tracestate)で伝播されます。"
@@ -101,9 +101,9 @@
       "question": "head-based samplingで sampling_rate=0.1 (10%) を設定した場合の挙動として正しいのは?",
       "choices": [
         "TraceのルートSpanで判定し、同一Trace内の全SpanをまとめてKeep/Dropする",
-        "各Spanごとに独立に10%サンプリング",
-        "エラーSpanだけ100%取り込む",
-        "RUMセッションも自動的に10%サンプル"
+        "各Spanごとに独立にサイコロを振り10%でサンプルされKeep/Dropが混在する",
+        "エラーステータスのSpanだけは設定値を無視して常に100%取り込まれる",
+        "RUMセッションも自動的に同じ10%レートでサンプルされるよう連動する"
       ],
       "answer": 0,
       "explanation": "head-basedはトレース先頭で判定し、サンプリング決定が後続Spanにも伝播するためTrace単位で一貫します。"
@@ -115,9 +115,9 @@
       "question": "RUMで Core Web Vitals の INP(Interaction to Next Paint) は何を測る指標?",
       "choices": [
         "ユーザー操作後、画面が次に視覚更新されるまでの応答性",
-        "初回ペイント完了までの時間のみ",
-        "LCP要素の画像サイズ",
-        "TCP接続にかかった時間"
+        "ページの初回ペイントが完了するまでにかかったミリ秒のみ",
+        "LCPに選ばれた要素の元画像ファイルサイズ(KB)を測る指標",
+        "サーバーとブラウザの間のTCP接続確立に要した平均時間"
       ],
       "answer": 0,
       "explanation": "INPはユーザーインタラクション全体の応答遅延を測る指標で、FIDの後継として2024年から正式採用されています。"
@@ -129,9 +129,9 @@
       "question": "Continuous Profiler を有効化することで分析できるのは?",
       "choices": [
         "プロセスのCPU/メモリ/ロックのホットスポット(関数単位)",
-        "ブラウザのCSSセレクタ解析時間",
-        "DNS逆引き失敗率",
-        "電子メール配送遅延"
+        "ブラウザがCSSセレクタを評価するのにかかった時間の分布",
+        "DNSサーバーが逆引きクエリに失敗した割合の時系列推移",
+        "送信した電子メールが配送されるまでにかかる平均遅延"
       ],
       "answer": 0,
       "explanation": "Continuous Profilerは本番に近い低オーバヘッドで関数レベルのCPU/メモリ/ロック競合などをプロファイルします。"
@@ -143,9 +143,9 @@
       "question": "Error Tracking のグルーピングロジックの主目的は?",
       "choices": [
         "同一原因のエラー大量発生をひとつのIssueに集約しノイズを減らす",
-        "全エラーを個別チケットとしてJIRAに送る",
-        "エラーをDBに圧縮保存する",
-        "エラー数をゼロに自動修正"
+        "発生した全エラーを個別のJIRAチケットとして自動的に作成して送信する",
+        "発生したエラー本文を全件DBに圧縮保存し容量を最小化することが目的",
+        "アプリのエラー件数を機械学習で自動的にゼロまで修正する機能である"
       ],
       "answer": 0,
       "explanation": "Error Trackingはfingerprint(stacktrace等)で同種エラーを集約し、運用上のノイズを抑えます。"
@@ -157,9 +157,9 @@
       "question": "Service Catalogで「サービスのオーナー(team)」を一元的に管理するために使うのは?",
       "choices": [
         "service.datadog.yaml(またはschema)をリポジトリに置く",
-        "ECSタスク定義に書く",
-        "API Gatewayのstageに書く",
-        "DNSのTXTレコード"
+        "ECSタスク定義のcontainerDefinitionsにowner: フィールドを書く",
+        "API GatewayのstageVariablesにteam情報を埋め込んで管理する",
+        "DNS TXTレコードに team=foo の形式でメタデータを書き込む"
       ],
       "answer": 0,
       "explanation": "Service Definition YAMLでオーナー、Slack、PagerDuty、Repo、Tier等のメタデータを宣言できます。"
@@ -171,9 +171,9 @@
       "question": "Span Linksの用途として最も適切なのは?",
       "choices": [
         "因果関係はあるが親子ではない複数Trace間の関連を表現(バッチ、Fan-in等)",
-        "Span IDをURLとして共有するだけ",
-        "Spanを暗号化する",
-        "RUMセッションを連結する"
+        "Span IDをURLパラメータに埋めてダッシュボードを共有するだけの機能",
+        "Spanをクライアント側で暗号化して保存する標準的なフォーマット仕様",
+        "RUMセッションをサーバー側で連結して1つのトレースに統合する機能"
       ],
       "answer": 0,
       "explanation": "Span Linksはバッチ処理や非同期消費等、親子関係では表せない関連を記述するOpenTelemetry標準の機能です。"
@@ -186,9 +186,9 @@
       "question": "APMのRetention Filters(ingestion control)とhead-based samplingの違いとして最も正しい説明は?",
       "choices": [
         "Retention Filtersは全Span取り込み後にindex対象を選別、head-basedはトレース先頭で取り込み自体を判定する",
-        "両者は同義で名称違いだけ",
-        "Retention Filtersはクライアントで動作する",
-        "head-basedはRUMにしか効かない"
+        "両者は実装上も機能上も完全に同義であり、ドキュメント上の名称が違うだけのまったく同じ機能を指している関係",
+        "Retention Filtersはブラウザ等のクライアント側で動作する仕組みであり、Agentやintakeサーバには一切関係しない",
+        "head-basedサンプリングはRUMセッションだけに効く仕組みであり、APMトレースの取り込み量には一切影響しない"
       ],
       "answer": 0,
       "explanation": "head-basedはAgent/トレーサ側で「送るか」、Retention Filtersはintake後に「indexして長期保存するか」を決めます。"
@@ -199,10 +199,10 @@
       "level": 3,
       "question": "RUMセッションとAPMトレースを紐付け、ブラウザfetchをサーバSpanまで辿れる状態にするのに必須なのは?",
       "choices": [
-        "RUM側で allowedTracingUrls(またはUrlPatterns)を設定し、サーバー側のトレーサがそのドメインのリクエストを受信できる",
-        "RUMをサーバーで実行",
-        "Cookie をServer-Sideでだけ発行",
-        "X-Forwarded-For を書き換える"
+        "RUM側で allowedTracingUrls(またはUrlPatterns)を設定し、サーバー側のトレーサが当該ドメインのリクエストを受信できる構成にする",
+        "RUMをサーバープロセスとして常駐実行し、ブラウザにはJavaScriptを一切配信しないアーキテクチャに切り替える必要があるとされる",
+        "セッションCookieをServer-Side専用に発行し、クライアント側JavaScriptからは一切読み取れないように厳格に制限する必要がある",
+        "リバースプロキシでX-Forwarded-Forヘッダの値を毎リクエストごとにランダム文字列で書き換えてtrace contextを伝播させる方式"
       ],
       "answer": 0,
       "explanation": "allowedTracingUrlsで対象オリジンを許可するとRUM SDKがtrace headerをinjectし、APMトレースとつながります。"
@@ -214,9 +214,9 @@
       "question": "Trace Metrics(自動生成されるhits/errors/duration時系列メトリクス)の特徴として正しいのは?",
       "choices": [
         "サンプリングに関わらず100%の集計から生成されるためダッシュボードに適する",
-        "サンプリング率と同じ確率でしか計測されない",
-        "Span Indexと完全に同じデータ",
-        "Logsから自動計算される"
+        "head-basedサンプリングと同じ確率でしか計測されず、低レートでは精度が大きく落ちる",
+        "Indexed Spanと完全に同じデータ実体であり、保存先もコストもまったく同一である",
+        "Logsをパースしたcount結果から自動計算され、APMトレーサ自体は関与していない"
       ],
       "answer": 0,
       "explanation": "Trace MetricsはAgentで集計され、サンプリングに関わらず100%の集計値が得られるため長期傾向に有用です。"
@@ -228,9 +228,9 @@
       "question": "Watchdog Insightsが自動検出するものは?",
       "choices": [
         "APM/Logs/Infra指標の異常変化やデグレ(Anomaliesと根本原因の候補)",
-        "AWSの請求額のみ",
-        "Kubernetes ConfigMapの編集履歴",
-        "TLS証明書の鍵長"
+        "AWSの月次請求額の異常上昇のみを検出するクラウドコスト専用の機能である",
+        "Kubernetes ConfigMapに対する編集履歴を時系列で記録し差分を可視化する",
+        "TLS証明書の鍵長(2048/4096bit)を継続的に集計して比率をダッシュボード化"
       ],
       "answer": 0,
       "explanation": "Watchdogは機械学習でレイテンシ/エラー率の異常やデプロイ起因の劣化を自動検出します。"
@@ -241,10 +241,10 @@
       "level": 3,
       "question": "Single Step Instrumentation (SSI) でJVMアプリを自動計装する際の正しい方式は?",
       "choices": [
-        "AgentまたはAdmission Controllerが起動時に -javaagent をinjectし、コード変更なしでトレース",
-        "全アプリをWebAssemblyに変換",
-        "JVMのコンパイラフラグを全部書き換える",
-        "DBに javaagent.jar を保存"
+        "AgentまたはAdmission Controllerが起動時に -javaagent オプションを自動injectし、コード変更なしでトレースを取得する",
+        "監視対象のJVMアプリを事前にWebAssemblyへ自動変換し、ブラウザのSandbox環境でJVMを再実行することで計装を行う",
+        "JVMのコンパイラ最適化フラグを開発者が全て手作業で書き換え、その上でアプリ全体を最初からビルドし直す必要がある",
+        "javaagent.jarファイル自体をDB(BLOBカラム)に保存しておき、JVM起動時にDBから取得・展開してから実行する独特の方式"
       ],
       "answer": 0,
       "explanation": "SSIはJVM起動引数やinit containerでトレーサJARをinjectし、ビルドや起動コマンドの書き換えなしで導入できます。"
@@ -256,10 +256,10 @@
       "level": 1,
       "question": "DatadogでホストのCPU/メモリを収集するためのコンポーネントは?",
       "choices": [
-        "Datadog Agent",
-        "Datadog Forwarder",
-        "Datadog Lambda Layer",
-        "RUM SDK"
+        "Datadog Agent(ホストに常駐するメトリクス/ログ収集プロセス)",
+        "Datadog Forwarder(Lambda関数の形式で動作するログ転送機能)",
+        "Datadog Lambda Layer(サーバーレス関数に埋め込む計装ライブラリ)",
+        "Datadog RUM SDK(ブラウザ側で実行されるユーザー監視ライブラリ)"
       ],
       "answer": 0,
       "explanation": "Datadog Agentがホストにインストールされ、システムメトリクスやログを収集します。"
@@ -270,10 +270,10 @@
       "level": 1,
       "question": "Host Mapの主な用途は?",
       "choices": [
-        "インフラ全体の状態を一覧で可視化し、タグでフィルタ",
-        "コード変更履歴の表示",
-        "アクセストークンの発行",
-        "請求情報の確認"
+        "インフラ全体の状態を一覧で可視化し、タグでフィルタする",
+        "リポジトリ上のコード変更履歴を時系列で並べて表示する",
+        "Datadog組織用のアクセストークンを画面から発行して管理する",
+        "毎月のクラウドサービス請求情報をダッシュボードで確認する"
       ],
       "answer": 0,
       "explanation": "Host Mapは多数のホストを一覧で可視化し、リソース状況やタグでフィルタできます。"
@@ -284,10 +284,10 @@
       "level": 1,
       "question": "Datadog Agent の Live Process 機能で得られるのは?",
       "choices": [
-        "実行中プロセス一覧とCPU/メモリ消費",
-        "ブラウザのDOMサイズ",
-        "BGP経路情報",
-        "S3バケット数"
+        "実行中プロセスの一覧と各プロセスのCPU/メモリ消費量",
+        "ブラウザ側で構築されたDOMノードの総数とサイズの推移",
+        "BGPルータが交換している経路情報とAS番号のグラフ表示",
+        "S3バケットの総数とリージョン別の容量分布の集計データ"
       ],
       "answer": 0,
       "explanation": "process_config を有効にするとプロセス単位のリソース使用状況を取得できます。"
@@ -298,10 +298,10 @@
       "level": 1,
       "question": "「タグ(tag)」の主目的は?",
       "choices": [
-        "メトリクスを多次元で分類・フィルタするキー:値",
-        "ログのIPアドレスを暗号化",
-        "Dashboardの背景色を変える",
-        "APIキーの期限を延ばす"
+        "メトリクスを多次元で分類・フィルタするためのキー:値ペア",
+        "ログ内のIPアドレスを自動的に暗号化して匿名化するための機能",
+        "Dashboardの背景色や見た目テーマを切り替えるための設定項目",
+        "発行済みAPIキーの有効期限を任意に延長するためのメタ情報"
       ],
       "answer": 0,
       "explanation": "タグは env:prod, service:api, team:platform のようにディメンションを表しドリルダウン分析に使われます。"
@@ -312,10 +312,10 @@
       "level": 1,
       "question": "Datadog Agentが公式に対応するOSとして含まれないのは?",
       "choices": [
-        "ファミコン本体",
-        "Linux",
-        "Windows",
-        "macOS"
+        "ファミリーコンピュータ(8bit家庭用ゲーム機)本体",
+        "Linux(各種ディストリビューションのamd64/arm64)",
+        "Windows Server / Windows 10以降のデスクトップOS",
+        "macOS(IntelおよびApple Silicon搭載のmacOS)"
       ],
       "answer": 0,
       "explanation": "Datadog AgentはLinux/Windows/macOSをサポートしますが、家庭用ゲーム機は対象外です。"
@@ -328,9 +328,9 @@
       "question": "KubernetesにDatadog Agentを展開する際、ノード全体のメトリクスをもれなく収集する標準的な配置は?",
       "choices": [
         "DaemonSetでノードごとに1Pod、加えてCluster Agentで集約",
-        "Deployment 1 replica のみ",
-        "CronJob で1日1回",
-        "全Podにサイドカーとして同居"
+        "Deploymentで replicas=1 とし、単一Podだけクラスタ全体を担当する",
+        "CronJobで1日1回起動し、メトリクスをまとめてバッチ送信する構成にする",
+        "全アプリPodに必ずサイドカーとして同居させ、Pod数だけAgentも増やす"
       ],
       "answer": 0,
       "explanation": "DaemonSetで各ノードに展開し、KSM等のクラスタ情報はCluster Agentで集約するのが推奨構成です。"
@@ -342,9 +342,9 @@
       "question": "Autodiscoveryでコンテナにインテグレーション設定を結びつけるためのアノテーション接頭辞は?",
       "choices": [
         "ad.datadoghq.com/<container_name>.check_names 等",
-        "datadog/legacy.yaml",
-        "ad-old/v1beta",
-        "prometheus.scrape: true のみ"
+        "datadog/legacy.yaml(廃止された旧形式のローカル設定ファイル)",
+        "ad-old/v1beta(過去のbeta時代に使われた非推奨のapiVersion)",
+        "prometheus.scrape: true をPod annotationに追加するだけで完結する"
       ],
       "answer": 0,
       "explanation": "Pod/コンテナのアノテーション ad.datadoghq.com/<name>.* で check_names, init_configs, instances を指定します。"
@@ -356,9 +356,9 @@
       "question": "Cluster Agentの主な役割として正しいのは?",
       "choices": [
         "ノードAgentに代わりk8s APIを集約呼出ししスケール時の負荷を軽減、Cluster Checks等を分配",
-        "全Podを再起動する",
-        "k8s Schedulerを置き換える",
-        "PVデータをバックアップ"
+        "監視対象のクラスタ内にある全Podを一定間隔で再起動して状態をクリーンに保つ仕組み",
+        "標準のk8s Schedulerを置き換えて、独自のスケジューリングロジックでPodを配置する",
+        "PersistentVolumeのデータを定期的にバックアップして外部ストレージへ転送する機能"
       ],
       "answer": 0,
       "explanation": "Cluster Agentはkube-apiserverへのアクセスを集約し、Cluster Checksの分配、HPA External Metrics等を担います。"
@@ -369,10 +369,10 @@
       "level": 2,
       "question": "短命コンテナのリソースも追跡したい場合、Agentで有効化すべきなのは?",
       "choices": [
-        "process collection と container lifecycle event(Live Containerビュー)",
-        "Cookie同意ポップアップ",
-        "RUM Session Replay のみ",
-        "Synthetic Test"
+        "process collection と container lifecycle event を有効化(Live Container)",
+        "ブラウザに表示する Cookie 同意ポップアップ用の RUM SDK 設定をチューニングして観測する方式",
+        "RUM のSession Replay を全ページ100%収録するよう設定し、間接的に短命コンテナを観測する方式",
+        "Synthetic API Test を1分間隔で実行し、HTTPプローブの可否から短命コンテナの存在を推定する方式"
       ],
       "answer": 0,
       "explanation": "process_collection_enabled とコンテナライフサイクル収集を有効にすると短命コンテナも観測対象に入ります。"
@@ -384,9 +384,9 @@
       "question": "AgentのCustom Checkを実装する際の基本構成は?",
       "choices": [
         "AgentCheckを継承したPythonクラス + checks.d/*.py + conf.d/*.yaml",
-        "Cで書いてカーネルmoduleとしてロード",
-        "DBにSQLで定義",
-        "ブラウザ拡張として実装"
+        "C言語で実装してLinuxカーネルモジュールとしてロードし、syscall経由で連携する",
+        "DBにSQLストアドプロシージャとして定義し、Agentが定期的にCALLして取得する",
+        "ChromeやFirefoxのブラウザ拡張として実装し、ユーザー操作で値を送信する"
       ],
       "answer": 0,
       "explanation": "Custom Checkは AgentCheck を継承し、conf.d にYAML、checks.d にPythonを置きます。"
@@ -398,9 +398,9 @@
       "question": "Cloud Cost ManagementがDatadogで提供するのは?",
       "choices": [
         "クラウド請求情報と利用メトリクスを紐づけて、無駄遣いの原因を可視化",
-        "デプロイ予算を自動承認",
-        "DBクエリを書き換え節約",
-        "OS Driverを自動アップデート"
+        "次回デプロイの予算稟議をワークフローで自動承認するクラウド支出ガバナンス機能",
+        "DBクエリを自動で書き換えてインデックス利用を促し、月額コストを最小化する機能",
+        "OSやドライバの自動アップデートを管理し、ライセンス費用の支払いを最適化する"
       ],
       "answer": 0,
       "explanation": "Cloud Cost Managementはコストとオブザーバビリティを統合し、サービスや環境単位でコスト要因を分析できます。"
@@ -412,9 +412,9 @@
       "question": "Agentがメトリクスを集約しDatadogへ送る際の標準的なフロー順は?",
       "choices": [
         "Check → Aggregator → Forwarder → intake API",
-        "Webhook → Lambda → S3 → CSV",
-        "DB → Trigger → JSON",
-        "Browser → DOM → DNS"
+        "Webhook → Lambda → S3 → CSVエクスポート → DBインポート",
+        "DB → DBトリガ → JSONビュー → 外部API → Datadog UI",
+        "Browser → DOMイベント → DNS解決 → SMTPサーバ経由"
       ],
       "answer": 0,
       "explanation": "AgentはCheck→Aggregator(統計)→Forwarder(バッファ・retry)→intakeへ送信します。"
@@ -427,9 +427,9 @@
       "question": "Network Performance Monitoring(NPM)がカーネルレベルでフローを可視化するために用いるのは?",
       "choices": [
         "system-probe(eBPFやconntrack)によるソケット/フロー収集",
-        "RUM SDK",
-        "AWS S3 lifecycle policy",
-        "DNSのSRVレコード"
+        "ブラウザに常駐するRUM SDKがWebSocket経由で観測した値を集計する仕組み",
+        "AWS S3のlifecycle policyに基づき1日1回フローログを集約しNPMへ取り込む",
+        "DNSのSRVレコードを利用してサービス間の依存関係を間接的に推測する方式"
       ],
       "answer": 0,
       "explanation": "NPMはAgentのsystem-probeコンポーネントがeBPFでカーネル空間のソケットイベントを観測しフローを収集します。"
@@ -441,9 +441,9 @@
       "question": "Universal Service Monitoring (USM) が「コードを変えずに」サービスを認識できるのはなぜ?",
       "choices": [
         "eBPFでL7プロトコル(HTTP等)とサービス境界を自動検出するから",
-        "GitHub APIを毎分ポーリングするから",
-        "DNSキャッシュを書き換えるから",
-        "kubectl getをCronで叩くから"
+        "GitHub APIを毎分ポーリングしてリポジトリ構造を解析し推測しているから",
+        "DNSキャッシュを動的に書き換えて、サービス境界を強制的に確定させているから",
+        "kubectl get を cron で定期的に叩いた結果からサービス一覧を抽出しているから"
       ],
       "answer": 0,
       "explanation": "USMはeBPFでL7パケットを観察し、自動的にサービスやエンドポイントを検出します(コード変更不要)。"
@@ -455,9 +455,9 @@
       "question": "Distribution Metric (distribution型カスタムメトリクス) の利点は?",
       "choices": [
         "クライアント側で集約せずraw値が集約サーバーで分位点(p95等)を算出できる",
-        "整数値のみ送れる",
-        "JSON Schemaが必須",
-        "ホスト数に依存しないが分位点が取れない"
+        "整数値のみを送信できる軽量型で、浮動小数点や分位点には対応していない仕様",
+        "送信時にJSON Schemaの完全な検証が必須となり、誤データの混入を防ぐ仕組み",
+        "ホスト数に依存せず送信できる一方で、p50やp95の分位点が一切取得できない"
       ],
       "answer": 0,
       "explanation": "distributionは生値を送り、サーバー側で全ホスト横断のp50/p95/p99などを正確に算出できます。"
@@ -468,10 +468,10 @@
       "level": 3,
       "question": "Cluster Checksをノードに分散させる仕組みとして正しいのは?",
       "choices": [
-        "Cluster Agentがチェック設定を保持しClusterCheckRunnerまたはノードAgentへ動的に配分",
-        "全ノードで重複実行",
-        "Helmチャートが直接動かす",
-        "Dockerfileに書き込む"
+        "Cluster Agentがチェック設定を保持し、ClusterCheckRunnerまたはノードAgentへ実行を動的にリバランス配分する",
+        "対象クラスタ内の全ノードがまったく同じCluster Checkを並列に重複実行し続ける、冗長を最大化した構成にする",
+        "Helmチャートのhookが継続的にCluster Checkを定期起動してくれる、Helm自体に組み込まれた専用機能で実現する",
+        "Dockerfileのbuildステップで各Checkをコンテナイメージに焼き込み、起動時にinit処理として自動実行させる方式"
       ],
       "answer": 0,
       "explanation": "Cluster Checksは中央のCluster Agentが管理し、Runner/ノードAgentへリバランス配分されます。"
@@ -482,10 +482,10 @@
       "level": 3,
       "question": "Tagging Best Practice として正しくないのは?",
       "choices": [
-        "ユーザーIDなど高カーディナリティ値をタグ値として大量に使う",
-        "env, service, version を統一的に付与",
-        "team, ownerをサービス単位で付与",
-        "tagの値はキー名と矛盾しないように標準化"
+        "ユーザーIDやリクエストIDなど高カーディナリティな値をtag値として大量付与し続ける運用",
+        "env / service / version を Unified Service Tagging のキーとして全テレメトリに付与する",
+        "team / owner / oncall など責任所在の情報をサービス単位で付与して連絡先を明確化する",
+        "tag 値の表記ゆれを命名規約で整備し、キー名と矛盾しないよう標準化を徹底する運用方針"
       ],
       "answer": 0,
       "explanation": "高カーディナリティタグはコスト増・集計遅延を招くため、IDのような値はタグでなく属性として扱うのが原則です。"
@@ -497,9 +497,9 @@
       "question": "Database Monitoring (DBM) で得られる情報として最も特徴的なのは?",
       "choices": [
         "正規化済みSQLクエリ単位の実行計画・待機イベント・上位クエリ統計",
-        "RDSの請求書PDF",
-        "S3に保存された全SQL本文の暗号文",
-        "DNSキャッシュの統計"
+        "RDSサービスの月次利用明細(請求書PDF)を自動取得して表示する機能",
+        "全SQL本文をS3バケットに暗号化保存し、後でフルテキスト検索できる仕組み",
+        "DNSリゾルバのキャッシュヒット率と平均TTLをDB単位で集計するための機能"
       ],
       "answer": 0,
       "explanation": "DBMはクエリの実行計画、待機イベント、上位クエリを継続観測し、APMトレースと連携できます。"
@@ -511,10 +511,10 @@
       "level": 1,
       "question": "Datadog Cloud SIEMは何を主に検知?",
       "choices": [
-        "ログ等から不審なセキュリティ行動",
-        "Dockerコンテナの起動時間",
-        "ホストのCPU温度",
-        "JS依存関係のバージョン"
+        "ログを横断的に分析した不審なセキュリティ行動",
+        "Dockerコンテナの起動にかかった平均時間の変化",
+        "ホストCPUの物理温度と冷却ファンの回転数の関係",
+        "JavaScript依存関係の semver バージョン分布の偏り"
       ],
       "answer": 0,
       "explanation": "Cloud SIEMはログを横断的に分析してセキュリティ脅威を検知します。"
@@ -526,9 +526,9 @@
       "question": "Sensitive Data Scannerが行うのは?",
       "choices": [
         "ログ等から個人情報・機密情報を検出してマスキング",
-        "CPUのスロットリング検出",
-        "外形監視の実行",
-        "Kubernetes Podの再起動"
+        "プロセスのCPUスロットリングの発生有無を継続検出する",
+        "外形監視(Synthetic Test)を定期的に実行し稼働確認する",
+        "Kubernetes Podの異常を検出して自動的に再起動を指示する"
       ],
       "answer": 0,
       "explanation": "Sensitive Data Scannerはログ、RUM、APMから機密情報を検出しマスキングします。"
@@ -540,9 +540,9 @@
       "question": "Application Security Management (ASM) の主目的は?",
       "choices": [
         "アプリ層への攻撃(SQLi, XSS等)の検知と保護",
-        "ホストファンの制御",
-        "S3バケット名のサジェスト",
-        "DNS TTLの自動最適化"
+        "サーバラックの冷却ファン回転数を制御する物理機能",
+        "S3バケット名の命名サジェストをUIで提示する補助機能",
+        "DNS TTL値をワークロード状況に応じて自動最適化する機能"
       ],
       "answer": 0,
       "explanation": "ASMはAPMトレースとSDKでアプリ層の攻撃を検知・ブロックします。"
@@ -553,10 +553,10 @@
       "level": 1,
       "question": "CSM (Cloud Security Management) のスコープに含まれるのは?",
       "choices": [
-        "クラウドリソースの誤設定や脆弱性の検出",
-        "ピアレビューSlackの返信",
-        "Excelシートのソート",
-        "メールの自動返信"
+        "クラウドリソースの誤設定や脆弱性を検出する機能群",
+        "ピアレビュー依頼のSlack返信を自動で代行するボット機能",
+        "Excelシートを開いて行をソートするオフィスツール統合機能",
+        "業務メールの自動返信文を生成するメールクライアント機能"
       ],
       "answer": 0,
       "explanation": "CSMはCloud Posture, Identity, Workload Protection等を含むクラウドセキュリティ製品群です。"
@@ -568,9 +568,9 @@
       "question": "Audit Trail機能の用途は?",
       "choices": [
         "Datadog組織内の操作(誰が何をしたか)を監査ログとして保存",
-        "外部からの攻撃を自動でブロック",
-        "メトリクスを暗号化",
-        "RUM SDKを難読化"
+        "外部からの攻撃を自動でブロックしてWAFのように防御する機能",
+        "送信中のメトリクスをエンドツーエンドで暗号化する転送オプション",
+        "ブラウザに配信されるRUM SDKを難読化して解析を困難にする機能"
       ],
       "answer": 0,
       "explanation": "Audit Trailはユーザー操作・APIアクセス等を記録し、コンプライアンス対応に使えます。"
@@ -582,10 +582,10 @@
       "level": 2,
       "question": "CSM Misconfigurationsが検出する典型例として正しいのは?",
       "choices": [
-        "S3バケットの公開設定や、過剰権限IAMポリシーの存在",
-        "Kotlinのコンパイル警告",
-        "JSバンドルサイズの肥大化",
-        "DBクエリの実行計画"
+        "S3バケットの誤った公開設定や、過剰権限IAMポリシーの存在",
+        "Kotlinビルド時にコンパイラが出力する警告メッセージの件数推移",
+        "フロントエンドのJavaScriptバンドルサイズが肥大化していること",
+        "DBクエリオプティマイザが選んだ実行計画の妥当性を継続評価する"
       ],
       "answer": 0,
       "explanation": "CSM MisconfigurationsはCISベンチマーク等に基づきクラウド構成の不備を検出します。"
@@ -597,9 +597,9 @@
       "question": "Software Composition Analysis (SCA) で検出されるのは?",
       "choices": [
         "OSS依存ライブラリの既知脆弱性(CVE)とライセンスリスク",
-        "CPUのキャッシュミス率",
-        "Dockerイメージのbuild時間",
-        "DNS解決遅延"
+        "CPUのL1/L2キャッシュミス率の継続的なベンチマーク統計",
+        "Dockerイメージのbuild時間を短縮するための最適化提案レポート",
+        "DNSリゾルバが応答するまでの平均解決遅延の世界各地比較データ"
       ],
       "answer": 0,
       "explanation": "SCAはアプリ依存ライブラリのCVE、ライセンス、推奨修正バージョン等を可視化します。"
@@ -610,10 +610,10 @@
       "level": 2,
       "question": "ASM In-App WAF(blocking)を有効化する前提条件として誤っているのは?",
       "choices": [
-        "Datadog Agentを停止する必要がある",
-        "対応バージョンのAPMトレーサが必要",
-        "ASMライセンスが必要",
-        "対象サービスでblocking modeを有効化"
+        "対象サービスで稼働中のDatadog Agentを停止しておく必要がある",
+        "対応バージョンのAPMトレーサがアプリに組み込まれている必要がある",
+        "Datadog組織でASMライセンス(Threat Management)が有効である必要がある",
+        "対象サービス側で blocking mode を明示的に有効化する設定が必要である"
       ],
       "answer": 0,
       "explanation": "ASM blockingはAPMトレーサと連動するため、Agentを停止すると動作しません。"
@@ -625,9 +625,9 @@
       "question": "CSM Identity Risksの検出対象は?",
       "choices": [
         "過剰権限IAMやアクセスキーの長期未使用などのIDリスク",
-        "ファイルアップロードの暗号化漏れ",
-        "DNSキャッシュポイズニング",
-        "Wi-Fi電波強度"
+        "アプリでファイルアップロード時に暗号化処理が漏れている箇所",
+        "DNSキャッシュポイズニング攻撃の継続的な検知と自動ブロック",
+        "オフィス内のWi-Fi電波強度の弱い領域をマップとして可視化する"
       ],
       "answer": 0,
       "explanation": "CSM Identity RisksはIAMの権限過多、アクセスキー、roleの長期未使用などを検出します。"
@@ -639,9 +639,9 @@
       "question": "Sensitive Data ScannerでLogs上のクレジットカード番号をマスクする手順として正しいのは?",
       "choices": [
         "Scanning Group + Ruleを作成し対象パイプラインでマッチさせ、置換アクションを設定",
-        "Logsを全削除する",
-        "RUM SDKでcanvas描画する",
-        "SIEMルールをOFFにする"
+        "Logs Indexの全データを定期的に削除して、PIIを物理的に保持しない方針に切り替える",
+        "RUM SDKを使ってブラウザのcanvas上に手書きで個人情報を消す機能を実装して送る",
+        "Cloud SIEMの検出ルールをすべて無効化してPIIスキャン処理自体を完全に停止する"
       ],
       "answer": 0,
       "explanation": "SDSはGroup→Ruleで対象スコープとパターンを定義し、ハッシュ/置換などのアクションを設定します。"
@@ -652,10 +652,10 @@
       "level": 2,
       "question": "Detection Ruleで「30分以内に同一IPから10回ログイン失敗」を検出する場合に使うのは?",
       "choices": [
-        "Threshold(または New Value/Anomaly)タイプのDetection Rule",
-        "Notebook の Markdown widget",
-        "Synthetic API Test",
-        "Service Map"
+        "Threshold(または New Value / Anomaly)タイプのDetection Rule",
+        "NotebookのMarkdown widgetに条件を記入しスナップショットで管理する手法",
+        "Synthetic API Testを1分間隔で実行し失敗時にDetection Ruleを起動する仕組み",
+        "Service Map上に表示される依存先サービスの色を変えるカスタム表示ルール設定"
       ],
       "answer": 0,
       "explanation": "ThresholdタイプのDetection Ruleでカウントベースのアラート条件を表現できます。"
@@ -667,10 +667,10 @@
       "level": 3,
       "question": "Cloud Workload Security (CWS) が検知する典型的なイベントとして適切なのは?",
       "choices": [
-        "コンテナ内での予期しないexecveやファイルの書き換え等のランタイム挙動",
-        "GitリポジトリのStar数",
-        "JS bundleのminify率",
-        "CSSセレクタ深度"
+        "コンテナ内での予期しない execve やファイル書換え等のランタイム挙動",
+        "GitHubリポジトリのStar数やフォーク数が短時間で変動した際のトレンド",
+        "JavaScriptバンドルのminify圧縮率がビルドごとにどう変化したかの推移",
+        "CSSセレクタのネスト深度がレンダリング性能に与えるブラウザ側の影響"
       ],
       "answer": 0,
       "explanation": "CWSはeBPFでカーネルイベント(プロセス・ファイル・ネットワーク)を観測し、不審な挙動を検知します。"
@@ -682,9 +682,9 @@
       "question": "CWSのカスタムAgent Ruleを書く際に使うDSLの特徴は?",
       "choices": [
         "プロセス/ファイル/ネットワーク等のイベント属性をブール式で組み合わせるルール式",
-        "JSON Schemaの完全コピー",
-        "regexのみ",
-        "Helm valuesと同じYAML"
+        "公開されているJSON Schemaをそのまま貼り付けるだけで判定条件として機能する形式",
+        "正規表現(regex)1本だけで全ての判定を行う制限的でシンプルな表現方法に限定される",
+        "Helm chartの values.yaml と完全に同じ書式・キー構造を持つ宣言的設定ファイル形式"
       ],
       "answer": 0,
       "explanation": "CWSのRule DSLはイベント種別と属性(filename, process.argv等)をboolean条件で記述します。"
@@ -695,10 +695,10 @@
       "level": 3,
       "question": "ASMでカスタム攻撃ブロックロジックをアプリコードから細かく制御するのに使うのは?",
       "choices": [
-        "ddtraceの ASM API(set_user, track_custom_eventや BlockingException)",
-        "Cloud Functionsのcold start hook",
-        "DNS Aレコード書き換え",
-        "S3バケットのCORS設定"
+        "ddtrace の ASM API(set_user / track_custom_event 等)をコードに組み込む方式",
+        "Cloud Functions の cold start フックを使い、ネットワークIFを呼び出しごとに動的に切り替える方式",
+        "DNSサーバの A レコードを攻撃者と思しき IP のみ書き換え、トラフィックをシンクホールへ誘導する方式",
+        "S3バケットの CORS 設定を極端に厳格化し、ブラウザからの全HTTPリクエストを物理的に遮断する方式"
       ],
       "answer": 0,
       "explanation": "ASMはSDKレベルで認証ユーザー情報のtagging、カスタムイベント、特定ユーザー/IPブロックを実装できます。"
@@ -710,9 +710,9 @@
       "question": "SCAの脆弱性とAPMサービスを統合表示することで得られる主な価値は?",
       "choices": [
         "「実際に本番で稼働中・通信中のサービス」だけに優先度を付けた脆弱性管理ができる",
-        "CIを停止できる",
-        "DNSキャッシュをクリアできる",
-        "RUMセッションを暗号化できる"
+        "CIパイプラインを安全のため強制停止し、全アプリを再ビルドする運用に切り替えられる",
+        "DNSリゾルバのキャッシュを脆弱性検出時に自動でクリアし、不正アクセスを未然に防げる",
+        "RUMで収集したユーザーセッションを脆弱性発覚時に自動で暗号化して証跡として残せる"
       ],
       "answer": 0,
       "explanation": "稼働状況・露出度を考慮し、Exploitable+Production+Public-Facingに優先順位付けできます。"
@@ -723,10 +723,10 @@
       "level": 3,
       "question": "Threat Modeling視点で『信号と脅威スコア』の優先度判定にDatadogが組み合わせる情報として誤っているのは?",
       "choices": [
-        "ダッシュボードのウィジェット位置",
-        "資産の重要度・露出",
-        "シグナルの再現性・既知パターン一致度",
-        "実際にexploitableかどうか"
+        "ダッシュボード上でウィジェットが配置されている位置(X, Y座標)情報",
+        "対象資産の重要度(criticality)と外部からの露出(public exposure)度合い",
+        "シグナルの再現性と、既知の攻撃パターン(MITRE ATT&CK等)との一致度",
+        "実際に exploitable な脆弱性が当該資産に存在しているかどうかの判定結果"
       ],
       "answer": 0,
       "explanation": "脅威スコアはアセット重要度・露出・シグナル特徴に基づき計算され、UIレイアウトとは無関係です。"
@@ -739,9 +739,9 @@
       "question": "Datadog LLM Observability が観測する対象は?",
       "choices": [
         "LLMアプリのプロンプト・レスポンス・コスト・レイテンシ",
-        "ファイルシステムのinode数",
-        "BGP経路情報",
-        "TLS証明書の有効期限のみ"
+        "ファイルシステムのinode残数と各ディレクトリの使用状況",
+        "BGPルータが交換するピア間の経路情報とAS path履歴",
+        "TLS証明書の有効期限と発行CAの信頼チェーンの妥当性のみ"
       ],
       "answer": 0,
       "explanation": "LLM ObservabilityはLLMチェーン、エージェント、ツール呼び出し、コスト、品質を可視化します。"
@@ -752,10 +752,10 @@
       "level": 1,
       "question": "AIエージェントワークフローを可視化する際、各ステップを表す概念は?",
       "choices": [
-        "Span(または Trace の階層構造)",
-        "Container Image",
-        "DNSレコード",
-        "JSONスキーマ"
+        "Span(またはTraceの階層構造として表現する単位)",
+        "Container Image(レジストリに登録されたコンテナの実体)",
+        "DNS Aレコード(エージェント名をIPに解決するための情報)",
+        "JSON Schema(エージェント呼び出しの入出力契約定義)"
       ],
       "answer": 0,
       "explanation": "LLM ObservabilityはAPMと同様にSpan/Traceでエージェントの各ステップを表現します。"
@@ -766,10 +766,10 @@
       "level": 1,
       "question": "LLM Observability で記録できる典型的なメタデータは?",
       "choices": [
-        "input/output/tokens/cost/model_name",
-        "OSのfan回転数",
-        "DNSのTXTレコード長",
-        "RDSのbinlog位置"
+        "input / output / tokens / cost などの LLM 固有メタデータ群",
+        "監視対象サーバの冷却ファン回転数の毎分平均値(ハードウェア由来テレメトリ)",
+        "DNS の TXT レコードに含まれる文字列長と更新頻度などの集計統計データのみ",
+        "RDS の binlog 書き込み位置(seek offset)と現在のレプリケーション lag の推移"
       ],
       "answer": 0,
       "explanation": "プロンプト、出力、トークン数、モデル、コストなどLLM固有メタデータが取れます。"
@@ -781,9 +781,9 @@
       "question": "LLM観測の利点として最も適切なのは?",
       "choices": [
         "品質・コスト・遅延・障害を統合的に管理できる",
-        "GPUの温度を冷やせる",
-        "RDSを自動shardingする",
-        "DNSの逆引き効率を上げる"
+        "推論用GPUの実機温度を直接冷却して長寿命化できる",
+        "RDSデータベースを自動的にshardingしクエリを並列化する",
+        "DNSリゾルバの逆引き効率を向上させ、解析処理を最適化する"
       ],
       "answer": 0,
       "explanation": "LLM Observabilityはdev/prod両方で品質・コスト・障害を統合管理する基盤を提供します。"
@@ -795,9 +795,9 @@
       "question": "LLM Observabilityで「Span」が表すものとして正しいのは?",
       "choices": [
         "LLM呼出し、ツール実行、検索、エージェント等の1ステップ",
-        "DBインデックス",
-        "CDNエッジロケーション",
-        "Slack Workspace"
+        "DBインデックスツリーのノード1つ(B+treeのleafに相当する単位)",
+        "CDNのエッジロケーション1拠点(POP)の物理サーバ集合の単位",
+        "Slack Workspaceに参加するチャンネル1つ分のメッセージスレッド"
       ],
       "answer": 0,
       "explanation": "SpanはLLM呼出し/Tool/Workflow/Retrieval/Embedding等のkindを持ち、ワークフローを可視化します。"
@@ -809,10 +809,10 @@
       "level": 2,
       "question": "LLMアプリで「ハルシネーション」「失敗」「逸脱」等を自動評価するために使うのは?",
       "choices": [
-        "Quality Evaluations(LLM-as-a-judge等の評価機能)",
-        "Synthetic Browser Test",
-        "Network Path Analysis",
-        "DNSのSPFレコード"
+        "Quality Evaluations(LLM-as-a-judge等の自動評価機能)",
+        "Synthetic Browser Test(外形監視によるエンドツーエンドUI検証)",
+        "Network Path Analysis(エンド間のネットワーク経路解析機能)",
+        "DNSのSPFレコード(メール送信ドメインの認証用設定レコード)"
       ],
       "answer": 0,
       "explanation": "LLM ObservabilityのEvaluations機能でfailure-to-answer、ハルシネーション、トピック逸脱等を自動評価できます。"
@@ -824,9 +824,9 @@
       "question": "LLM呼び出しのトークン数とコストを記録するために必要なのは?",
       "choices": [
         "ddtraceのLLM Observability SDKを統合(プロバイダ別の自動計装が走る)",
-        "Sensitive Data ScannerをON",
-        "Datadog Mobile App",
-        "JIRAインテグレーション"
+        "Sensitive Data ScannerをONにして、入力テキストの語数を間接的に集計し記録する",
+        "Datadog Mobile Appをサーバに常駐させてリクエストごとに通知を受け取って数える",
+        "JIRAインテグレーションを有効化し、リクエストごとにチケットを発行して集計する"
       ],
       "answer": 0,
       "explanation": "ddtraceや専用SDKでOpenAI/Anthropic等の呼び出しを自動計装し、トークン・コストが記録されます。"
@@ -838,9 +838,9 @@
       "question": "LLM Observability の Sessionとは?",
       "choices": [
         "同一ユーザー・会話に属する複数Trace/Spanを束ねる単位",
-        "TCPコネクション",
-        "Kubernetesの名前空間",
-        "Service Mapのノード"
+        "クライアント−サーバ間で開かれているTCPコネクション1本の状態",
+        "Kubernetesクラスタ内で論理分離するための namespace の別名表現",
+        "Service Mapに描画される依存ノード1つ分のサービス表示単位"
       ],
       "answer": 0,
       "explanation": "Sessionは複数Traceにまたがる会話を束ね、チャットUXの分析やフィードバック紐付けに使えます。"
@@ -851,10 +851,10 @@
       "level": 2,
       "question": "User Feedback API でクライアントから「いいね/わるいね」を送る目的は?",
       "choices": [
-        "Span/Sessionに直接フィードバックを紐づけ、品質メトリクスとして集計",
-        "RDS rollback",
-        "RUM Replayをmute",
-        "Lambda再デプロイ"
+        "Span/Sessionに直接フィードバックを紐づけ、品質メトリクスとして集計する",
+        "RDSのトランザクションをユーザーフィードバックに応じてrollbackする運用機能",
+        "RUM Session Replayのマイクロホン入力をmuteするためのクライアント設定機能",
+        "AWS Lambdaの該当関数を再デプロイするためのfeedback駆動のCIトリガー機能"
       ],
       "answer": 0,
       "explanation": "User Feedback送信でEvaluationsと共に品質ダッシュボードを構築できます。"
@@ -866,9 +866,9 @@
       "question": "Prompt Templates / Versioning の観測がもたらす価値は?",
       "choices": [
         "プロンプト変更前後の品質・コスト・遅延の比較が容易になる",
-        "GPUが自動増設される",
-        "DNSキャッシュが拡大",
-        "S3に勝手に保存される"
+        "推論用GPUが必要に応じて自動増設され、コスト無視で性能が向上する",
+        "DNSキャッシュが拡大されることで、プロンプト解決速度が大きく改善する",
+        "プロンプト本文がS3バケットに自動保存され、社外秘でも全文公開されてしまう"
       ],
       "answer": 0,
       "explanation": "プロンプトバージョンをメタデータとして付与することでA/B比較や回帰検出ができます。"
@@ -879,10 +879,10 @@
       "level": 2,
       "question": "RAGアプリで検索の妥当性を観測したい場合、Spanとして残すと特に有用なのは?",
       "choices": [
-        "Retrievalステップで取得したドキュメントID/スコア",
-        "LBの設定変更履歴",
-        "DNSのTTL",
-        "ELBのSSL ciphers"
+        "Retrievalステップで取得したドキュメントID/スコア/ヒット件数",
+        "ロードバランサ(LB)のターゲットグループ設定変更の履歴と変更者",
+        "DNSレコードのTTL値が短時間でどう変化したかのタイムライン情報",
+        "ELBのSSL ciphersが現在どのバージョンを優先しているかの設定情報"
       ],
       "answer": 0,
       "explanation": "Retrieval Spanにドキュメント情報を残すと、ハルシネーション要因の調査が現実的になります。"
@@ -894,10 +894,10 @@
       "level": 3,
       "question": "マルチエージェントワークフローで各エージェントの呼出階層を正しく表現するために重要なのは?",
       "choices": [
-        "trace contextを子呼出に伝播し、Workflow/Agent/Toolなど適切なSpan kindで階層化",
-        "全エージェントを単一プロセスに集約",
-        "プロンプトを暗号化",
-        "全エージェントを同一IPで起動"
+        "trace context を子呼出に伝播し、適切な Span kind で階層化する",
+        "全エージェントを単一プロセス上に集約してしまい、関数呼び出しのみで連携する構成へ統一する方針",
+        "各エージェントが送るプロンプト本文をすべて暗号化することで、可観測対象から外して保護する運用",
+        "全エージェントを同一の固定IPアドレスで起動して、ネットワーク的に同居させる構成に統一する方針"
       ],
       "answer": 0,
       "explanation": "trace context伝播と適切なSpan kind設計でマルチエージェントの因果関係を可視化できます。"
@@ -909,9 +909,9 @@
       "question": "LLM Observabilityで「Failure-to-Answer」を継続評価する目的として最も適切なのは?",
       "choices": [
         "回答困難な質問パターンを検出し、Retrieval/プロンプト改善のシグナルにする",
-        "全LLMコストをゼロにする",
-        "ユーザーIDを暗号化",
-        "GPUを増設"
+        "LLM呼び出しに伴う全コストを継続的にゼロまで圧縮する自動コスト最適化の仕組み",
+        "ユーザーIDをfailure発生時に自動暗号化して、ログから個人特定を完全に防ぐ機能",
+        "推論用GPUを継続的に増設し、failure発生時には自動的にハードを置き換える仕組み"
       ],
       "answer": 0,
       "explanation": "Failure-to-Answer評価は知識ギャップ・プロンプト不備の検出に有効で、継続改善のKPIになります。"
@@ -922,10 +922,10 @@
       "level": 3,
       "question": "本番LLMアプリでPIIマスキングを徹底するためにLLM Observability + 別機能で組み合わせるべきは?",
       "choices": [
-        "Sensitive Data Scanner(SDS)でinput/outputをマスク",
-        "VPCのRoute Tableを書き換える",
-        "DNSキャッシュを無効化",
-        "RUMをOFFにする"
+        "Sensitive Data Scanner(SDS)でinput/outputのPIIを検出しマスクする",
+        "VPCのRoute Tableを動的に書き換えてPIIを含むリクエストだけ別経路へ流す方式",
+        "DNSキャッシュを継続的に無効化して、PII文字列の名前解決を物理的に阻害する方式",
+        "RUM SDK自体を完全にOFFにして、ブラウザ側からのテレメトリ収集を全停止する方式"
       ],
       "answer": 0,
       "explanation": "SDSと組み合わせるとプロンプト/応答中のPIIを置換・ハッシュ化でき、コンプライアンスを満たせます。"
@@ -936,10 +936,10 @@
       "level": 3,
       "question": "Evaluations(LLM-as-a-judge)の信頼性を高めるベストプラクティスは?",
       "choices": [
-        "評価モデル/プロンプトを明示・固定し、サンプリングと人手抽出レビューを併用",
-        "毎日プロンプトをランダム変更",
-        "評価モデルを廃止しランダム判定",
-        "全件人手レビューのみ"
+        "評価モデル/プロンプトを明示・固定し、サンプリングと人手抽出レビューを併用する",
+        "毎日評価プロンプトをランダムに変更し、評価結果の多様性を最大化することを目指す",
+        "評価モデル自体を完全に廃止し、サイコロを振ったランダム判定に置き換える運用にする",
+        "サンプリングは一切せず、全本番リクエストの結果を人手レビューで100%確認する運用"
       ],
       "answer": 0,
       "explanation": "LLM-as-a-judgeは評価プロンプト/モデルを固定しサンプリング+人手抽出で校正することが信頼性向上の鍵です。"
@@ -950,10 +950,10 @@
       "level": 3,
       "question": "コスト最適化で「同一品質を保ったままコスト50%削減」する打ち手のうちLLM Observabilityで効果を最も計測しやすいのは?",
       "choices": [
-        "プロンプト短縮/モデル切替のA/Bを実施し、品質Evaluationsとコストを比較",
-        "DBインデックスを増やす",
-        "DNSキャッシュを延ばす",
-        "Synthetic Testを停止"
+        "プロンプト短縮/モデル切替のA/Bを実施し、品質Evaluationsとコストを並べて比較する",
+        "DBのインデックスを増やしクエリ性能を上げることで間接的にLLMコストを下げる方針",
+        "DNSキャッシュTTLを長く延ばすことで再解決を抑え、結果的にLLM呼び出しを減らす方針",
+        "Synthetic Testを停止することでLLM API呼び出し総数を機械的にゼロに近づける方針"
       ],
       "answer": 0,
       "explanation": "Evaluations+Costの並列ダッシュボードでA/B比較し、品質を保つ条件下のコスト最適化を計測できます。"
@@ -965,10 +965,10 @@
       "level": 1,
       "question": "Datadog CI Visibilityで可視化できるものは?",
       "choices": [
-        "CIパイプラインの実行時間・失敗率・所有関係",
-        "CDNのキャッシュヒット率",
-        "OS版バージョン",
-        "MFAの設定状態"
+        "CIパイプラインの実行時間・失敗率・所有チーム関係などの統計",
+        "CDNエッジで観測されるキャッシュヒット率の地域別分布グラフ",
+        "サーバーで動作しているOSの正確なバージョン文字列の集計結果",
+        "ユーザー全員のMFA(多要素認証)有効状況の組織内集計レポート"
       ],
       "answer": 0,
       "explanation": "CI VisibilityはGitHub Actions、CircleCI、GitLab等のパイプライン実行情報を収集・可視化します。"
@@ -979,10 +979,10 @@
       "level": 1,
       "question": "Test Visibilityの主な利用目的は?",
       "choices": [
-        "Flakyテストや遅いテストを特定して品質改善",
-        "Web ACLのルール変更",
-        "RDSの自動バックアップ",
-        "ELB証明書ローテーション"
+        "Flakyテストや遅いテストを特定してCI品質を改善する",
+        "Web Application Firewall のルール変更履歴を管理する",
+        "RDSデータベースの定期自動バックアップを管理運用する",
+        "ELBに紐づくSSL証明書の有効期限ローテーション管理"
       ],
       "answer": 0,
       "explanation": "Test Visibilityでフレーキー・遅いテストや失敗パターンを特定し、CI効率を上げます。"
@@ -993,10 +993,10 @@
       "level": 1,
       "question": "Deployment Tracking(リリーストラッキング)の目的は?",
       "choices": [
-        "デプロイ前後のメトリクス変化を比較して影響を把握",
-        "デプロイ予算を自動承認",
-        "GitHub上にリリースタグを生成しない",
-        "DBへ自動ロールバックを発動"
+        "デプロイ前後のメトリクス変化を比較して影響を把握する",
+        "次回のデプロイに使う予算の稟議をワークフローで自動承認する",
+        "GitHub上にデプロイ毎のリリースタグを生成することを抑止する",
+        "デプロイ失敗時にDBへ自動ロールバックを発動するための仕組み"
       ],
       "answer": 0,
       "explanation": "デプロイマーカーを記録し、エラーレートやレイテンシ変化と紐付けて影響を確認できます。"
@@ -1007,10 +1007,10 @@
       "level": 1,
       "question": "Datadogが収集する「Pipeline」イベントの基本要素として正しいのは?",
       "choices": [
-        "pipeline name, status, duration, repo, branch, commit",
-        "ピザのトッピング",
-        "GPUのVRAM",
-        "プリンタの紙残量"
+        "pipeline / status / duration / repo / branch / commit",
+        "ピザ屋のトッピング種類とサイズ別売上を店舗ごとに集計したフィールド群",
+        "サーバ搭載 GPU の VRAM 容量と現在の使用率を毎秒記録する用フィールド",
+        "オフィスプリンタの用紙残量と部署別月間印刷枚数を集計するフィールド"
       ],
       "answer": 0,
       "explanation": "Pipelineイベントは名前/状態/期間/Repo/Branch/Commit等のメタデータで構成されます。"
@@ -1021,10 +1021,10 @@
       "level": 1,
       "question": "Test Optimization が指す機能群に含まれるのは?",
       "choices": [
-        "Flaky Test Management, ITR, Early Flake Detection 等",
-        "DNS TTL最適化",
-        "DBインデックスチューニング",
-        "サーバーラックの空調最適化"
+        "Flaky Test Management / ITR / Early Flake Detection などの機能群",
+        "DNS サーバの TTL を負荷状況に応じて自動最適化する運用機能群",
+        "DB のインデックスを使用パターンに応じて自動チューニングする機能群",
+        "オンプレデータセンターのサーバラックの空調を最適化する物理運用機能群"
       ],
       "answer": 0,
       "explanation": "Test Optimizationはflaky管理・ITR・早期検出など複数機能をまとめた製品群です。"
@@ -1037,9 +1037,9 @@
       "question": "Datadog CIにパイプライン情報を送る一般的な方法は?",
       "choices": [
         "datadog-ci CLIまたは公式インテグレーションをCIに組み込む",
-        "RDSをcronで再起動",
-        "AWS S3 IntelligentTiering 有効化",
-        "DNSのTTLを1秒に"
+        "RDSをcronで毎時再起動してCIメトリクスをbinlog経由で抽出する",
+        "AWS S3のIntelligent-Tieringを有効化してCIログを自動収集させる",
+        "DNSのTTLを1秒に短縮してCIサーバの状態をDatadogに通知させる"
       ],
       "answer": 0,
       "explanation": "datadog-ci CLIや各CIプロバイダ公式インテグレーションでJob/Pipelineイベントが送信されます。"
@@ -1050,10 +1050,10 @@
       "level": 2,
       "question": "Flakyテストのデフォルトの判定としてDatadogが採用する代表的な指標は?",
       "choices": [
-        "同一コミットで成功と失敗を同時に観測するテスト",
-        "実行時間が1ms以下のテスト",
-        "コメントに'flaky'を含むテスト",
-        "PRタイトルにflakyとあるテスト"
+        "同一コミット/ブランチで成功と失敗が混在して観測されるテスト",
+        "実行時間が1ミリ秒以下と極端に短く完了してしまうテストを優先的に判定",
+        "コメント中に文字列 'flaky' が含まれているテストだけをflaky扱いとする",
+        "PRのタイトルに 'flaky' という単語が含まれているテストを自動的に判定する"
       ],
       "answer": 0,
       "explanation": "同一commit/ブランチで成功・失敗が混在するテストをflakyと判定するのが代表的シグナルです。"
@@ -1065,9 +1065,9 @@
       "question": "Test Quarantine の効果として正しいのは?",
       "choices": [
         "Flakyなテストを隔離してパイプライン失敗からは除外しつつ実行は続ける",
-        "全テストを完全に削除",
-        "全テストを2回実行",
-        "テストを暗号化"
+        "リポジトリ内の全テストを物理的に完全削除し、CIをグリーンに保つ仕組みを提供する",
+        "全テストを必ず2回ずつ実行することで、結果のブレを多数決で平準化するための仕組み",
+        "テスト本文を暗号化することで内容変更を防ぎ、結果のflakyさを抑止するための仕組み"
       ],
       "answer": 0,
       "explanation": "Quarantineに入れたテストはpassの結果に依存させず、CI失敗を減らしつつ可視化を継続できます。"
@@ -1078,10 +1078,10 @@
       "level": 2,
       "question": "Datadog Code Analysis (Static Analysis) で検出するのは?",
       "choices": [
-        "Lint/Security/コード品質ルール違反",
-        "RDSのbinlog欠損",
-        "DNSのTTL誤設定",
-        "プリンタの紙づまり"
+        "Lint / Security / コード品質ルール違反などの静的解析結果",
+        "RDSのbinlogファイルが欠損していないかを継続的に検査する機能",
+        "DNSのTTL値が誤って短すぎる/長すぎる設定になっていないかの解析",
+        "オフィスプリンタが紙詰まりを起こした履歴とその修復時間の統計値"
       ],
       "answer": 0,
       "explanation": "Datadog Static Analysisは複数言語のlint/セキュリティ/品質ルールをCIで実行できます。"
@@ -1092,10 +1092,10 @@
       "level": 2,
       "question": "Deployment Tracking で `service` と紐づけるために重要なタグは?",
       "choices": [
-        "env, service, version の Unified Service Tagging",
-        "owner, retain, mfa",
-        "browser, screen, fps",
-        "stage, lambda, region のみ"
+        "env / service / version を統一する Unified Service Tagging",
+        "owner / retain / mfa などのアクセス権限まわりに関連するタグ群",
+        "browser / screen_resolution / fps などのRUMで使われるクライアント情報",
+        "stage / lambda_arn / region のみで構成される、サーバーレス専用のタグ群"
       ],
       "answer": 0,
       "explanation": "Unified Service Tagging (env/service/version) でデプロイマーカーとサービスを正確に結びつけられます。"
@@ -1106,10 +1106,10 @@
       "level": 2,
       "question": "GitHub Actionsの実行を CI Visibility に正確に送る基本構成は?",
       "choices": [
-        "公式Datadog GitHub IntegrationまたはWebhookでイベントを送信し、必要に応じてdatadog-ciでテストレポート送信",
-        "GitHub Actionsをcronで停止",
-        "Webhookを全部GMailに送る",
-        "GitHub Pagesに公開する"
+        "公式Datadog GitHub IntegrationまたはWebhookでイベントを送信し、testレポートはdatadog-ciで送る",
+        "GitHub Actionsの動作をcronで定期停止し、停止イベント自体だけをDatadogに通知する構成にする",
+        "GitHub WebhookをすべてGoogle MailのInboxへ転送し、ラベルからCI状態を推測する仕組みにする",
+        "GitHub Pagesに公開された静的HTMLをスクレイピングし、CI実行情報を擬似的に抽出して送信する"
       ],
       "answer": 0,
       "explanation": "公式IntegrationでPipelineイベントを取り込み、testレポートはdatadog-ciでアップロードします。"
@@ -1122,9 +1122,9 @@
       "question": "Intelligent Test Runner (ITR) を有効化することで得られる効果として正しいのは?",
       "choices": [
         "コード変更に関連するテストのみを実行しCI時間を削減(カバレッジマップに基づく)",
-        "本番にテストを直接デプロイ",
-        "全テストを完全に停止",
-        "全テストを並列で2倍時間で実行"
+        "テストコードを本番環境に直接デプロイし、本番上で実行することでstaging不要にする運用",
+        "全テストの実行自体を完全に停止することで、CI実行時間をゼロまで圧縮する究極の最適化",
+        "全テストを2倍の並列度で実行することで、実行時間がちょうど2倍に増える設計の検証機能"
       ],
       "answer": 0,
       "explanation": "ITRは変更コードのカバレッジに基づき無関係なテストをskipしCI時間を短縮します。"
@@ -1135,10 +1135,10 @@
       "level": 3,
       "question": "Early Flake Detection(EFD)の典型的な仕組みは?",
       "choices": [
-        "新規/変更テストを複数回再実行し、結果の安定性を判定",
-        "全テストを暗号化して並列実行",
-        "JSの圧縮率を確認",
-        "DNSキャッシュをクリア"
+        "新規/変更テストを複数回再実行し、結果の安定性を判定してflakyを早期に検出する",
+        "リポジトリ内の全テストを暗号化したうえで並列実行し、結果差分からflakyを推定する",
+        "JavaScriptバンドルの圧縮率を解析し、その値からテストのflaky度合いを間接的に判定する",
+        "DNSキャッシュを継続的にクリアすることで、結果のばらつきを意図的に増やして検出する"
       ],
       "answer": 0,
       "explanation": "EFDは新規/変更されたテストを複数回実行し、初期段階でflakyを検出します。"
@@ -1149,10 +1149,10 @@
       "level": 3,
       "question": "CI Visibility上で「あるデプロイ起因の障害」を最短で特定する典型ワークフローは?",
       "choices": [
-        "Deployment Markerでデプロイ時刻を可視化→APMでerror rateの跳ね上がりを確認→CI Pipelineにdrilldown",
-        "全Logsをローカルに保存しgrepで探す",
-        "RUM Session Replayだけを見る",
-        "DNS応答時間だけ調査"
+        "Deployment Marker → APM の error rate 跳ね上がり確認 → CI Pipeline へ drilldown",
+        "全 Logs を開発者ローカルマシンにダウンロードし、grep コマンドだけで障害原因を手動検索するという手順",
+        "RUM Session Replay 動画だけを片端から眺め続け、ユーザー操作からデプロイ起因の障害を再現する手順",
+        "DNS 応答時間だけを継続的に計測することで、デプロイ起因の本番障害の有無を間接的に推定する手順"
       ],
       "answer": 0,
       "explanation": "Deployment Marker→APM error rate→該当Pipeline/Commitへのdrill downが標準的なRCAルートです。"
@@ -1163,10 +1163,10 @@
       "level": 3,
       "question": "Test Impact Analysis(ITRの基盤)に必要な前提として正しいのは?",
       "choices": [
-        "テスト実行時にコードカバレッジを記録しテスト-コードの依存マップを構築",
-        "全テストを単一スレッドで走らせる",
-        "GitリポをZIPで保存",
-        "DBスナップショットを毎晩取る"
+        "テスト実行時にコードカバレッジを記録しテスト-コードの依存マップを構築する",
+        "テスト並列度を1に固定し、必ず単一スレッドで全テストを順次走らせる構成にする",
+        "Gitリポジトリを毎晩ZIP圧縮して外部ストレージに退避することが前提条件となる",
+        "アプリのDBスナップショットを毎晩取得し、それを基にテスト対象を推定する仕組み"
       ],
       "answer": 0,
       "explanation": "ITRはテスト実行時のカバレッジ収集を前提に、変更コードと無関係なテストを安全にskipします。"
@@ -1178,9 +1178,9 @@
       "question": "Datadog Source Code Integration を有効にすると得られる主な利点は?",
       "choices": [
         "ErrorやAPM Stack Traceから該当コミット/行へGitHub等にディープリンクできる",
-        "Gitリポを自動圧縮できる",
-        "DBのDDLを自動修正",
-        "DNSキャッシュTTLを最適化"
+        "Gitリポジトリを自動でtarball圧縮して、外部ストレージへ転送する仕組みが組み込まれる",
+        "DBのDDLが本番障害発生時に自動で修正されるよう、Datadogから直接書き換える仕組み",
+        "DNSキャッシュTTLを継続的に自動最適化し、APMトレースの解決速度を向上させる機能"
       ],
       "answer": 0,
       "explanation": "Source Code IntegrationでバージョンタグからGitリポにリンクし、エラー解析のMTTRを下げます。"
@@ -1192,10 +1192,10 @@
       "level": 1,
       "question": "SLO(Service Level Objective)とは?",
       "choices": [
-        "サービスが目指す信頼性の目標値",
-        "サーバーの最大同時接続数",
-        "DBのスキーマバージョン",
-        "ログの保存期間"
+        "サービスが目指す信頼性の目標値(例: 99.9%)",
+        "サーバーが受け入れ可能な最大同時接続数の閾値",
+        "DBスキーマの現行バージョン番号を表す識別子",
+        "ログを保持しておく期間(retention)の設定値"
       ],
       "answer": 0,
       "explanation": "SLOは「99.9%が成功」など、SLI(指標)に対する目標値を定めるものです。"
@@ -1206,10 +1206,10 @@
       "level": 1,
       "question": "Error Budgetの定義として正しいのは?",
       "choices": [
-        "100% - SLO 相当の許容失敗量",
-        "予算カテゴリのタグ",
-        "GitHubのリリース予算",
-        "RUMセッションのコスト見積もり"
+        "100% - SLO 相当の許容失敗量(例: 99.9%なら0.1%分)",
+        "予算カテゴリを分類するための単なる経理用のタグ表記",
+        "GitHubでリリースを行うために確保しておく開発予算枠",
+        "RUMセッションを取得する際に発生するコストの見積もり値"
       ],
       "answer": 0,
       "explanation": "100% - SLOがError Budgetで、許容できる失敗量を示します。"
@@ -1221,9 +1221,9 @@
       "question": "SLI(Service Level Indicator)とは?",
       "choices": [
         "サービス信頼性を測る具体的な指標(例: 成功リクエスト/総リクエスト)",
-        "障害連絡先",
-        "コードレビュアー名",
-        "RDSのリードレプリカ数"
+        "障害発生時に最初に電話するためのオンコール担当者の連絡先情報のこと",
+        "サービスのコード変更をレビューする責任者のGitHubユーザー名を指す",
+        "サービス用RDSに設定されているリードレプリカの台数を表す数値のこと"
       ],
       "answer": 0,
       "explanation": "SLIは目標を測るための具体的な計算式(可用性、レイテンシ等)を指します。"
@@ -1234,10 +1234,10 @@
       "level": 1,
       "question": "SLAとSLOの違いとして正しいのは?",
       "choices": [
-        "SLAは契約上のサービス品質、SLOは社内目標",
-        "両者は同義",
-        "SLOは法律で決まる",
-        "SLAは技術指標を含まない"
+        "SLAは契約上のサービス品質保証、SLOは社内向けに設定する内部目標",
+        "両者は語感が違うだけの完全な同義語で、機能としても完全に同じものを指す",
+        "SLOは国の法律によって定義され改廃されるため、組織側では一切編集できない",
+        "SLAは契約書だが技術指標は含まず、稼働率などの数値とは一切関係しない概念"
       ],
       "answer": 0,
       "explanation": "SLAは契約上の品質保証、SLOはより厳しめに設定する内部目標として使い分けます。"
@@ -1248,10 +1248,10 @@
       "level": 1,
       "question": "Datadog SLO Statusウィジェットで主に表示されるのは?",
       "choices": [
-        "達成状況・Error Budget残量・推移グラフ",
-        "プログラミング言語の人気度",
-        "JIRAバックログ数",
-        "OSパッチ適用状態"
+        "達成状況・Error Budget残量・推移グラフ等のSLO状態",
+        "現在開発で人気のあるプログラミング言語の世界的なランキング",
+        "JIRAバックログに登録されているチケットの累計総数と内訳の分布",
+        "ホストOSのパッチ適用状態と未適用脆弱性件数を一覧で見るダッシュボード"
       ],
       "answer": 0,
       "explanation": "SLO WidgetはSLO達成状況、残Error Budget、Burn Rate等の状態を示します。"
@@ -1263,10 +1263,10 @@
       "level": 2,
       "question": "DatadogでMetric-based SLOとMonitor-based SLOの本質的な違いは?",
       "choices": [
-        "Metric-basedは時系列クエリ(good/total)で算出、Monitor-basedはモニターの状態履歴(uptime)から算出",
-        "両者は完全同義",
-        "Monitor-basedはLLM専用",
-        "Metric-basedはAPMにしか使えない"
+        "Metric-basedは時系列クエリ(good/total)で算出、Monitor-basedはモニターの状態履歴(uptime)から算出する",
+        "両者は完全に同義であり、Datadog UI上で名称が違うだけで、内部的なロジックも結果も完全に同じ仕組みである",
+        "Monitor-basedはLLM Observability専用のSLO算出方式であり、APM/Infra指標には一切使えない制約がある",
+        "Metric-basedはAPM由来のメトリクスにしか使えず、Infraやログ由来の指標では計算できない制約があるもの"
       ],
       "answer": 0,
       "explanation": "Metric-basedは数値クエリ、Monitor-basedはモニター履歴(alert/ok)に基づきSLO達成率を算出します。"
@@ -1278,9 +1278,9 @@
       "question": "Burn Rate(消費速度)が `2x` とはどんな意味?",
       "choices": [
         "現在の速度で消費を続けると、Error Budgetを期間の半分で使い切る速度",
-        "Error Budgetを2倍に増やす",
-        "SLO目標を2倍に厳しくする",
-        "monitorを2倍の頻度で評価する"
+        "Error Budgetが急に2倍に増えて、本来の許容失敗量を超えて使える状態のこと",
+        "SLOの目標値そのものを管理者が手動で2倍厳しい数値へ書き換える操作を指す",
+        "Datadogが内部的にモニターを2倍の頻度で再評価するように切り替えるモード"
       ],
       "answer": 0,
       "explanation": "Burn Rate = 実際の失敗率 / 許容失敗率。2x なら期間半分で予算を使い切るペース。"
@@ -1292,9 +1292,9 @@
       "question": "Time Window SLO で「rolling」と「calendar」の違いは?",
       "choices": [
         "rollingは過去N日間の移動ウィンドウ、calendarは月初等の暦に基づく固定ウィンドウ",
-        "両者は同義",
-        "calendarはAPM専用",
-        "rollingはLogs専用"
+        "両者は表記が違うだけの完全な同義語で、計測方法もリセットタイミングもまったく同じ",
+        "calendar SLOはAPMのトレースデータにしか適用できず、ログやインフラ指標では使えない",
+        "rolling SLOはLogsクエリ専用であり、メトリクスやモニター由来のSLIには利用できない"
       ],
       "answer": 0,
       "explanation": "rollingは継続的なTrailing window、calendarは月初リセット等の固定ウィンドウです。"
@@ -1305,10 +1305,10 @@
       "level": 2,
       "question": "Latency SLOで「99% のリクエストが 300ms以下」を表現する代表方式は?",
       "choices": [
-        "good = (latency<=300ms件数), total = (全件数)を用いたMetric-based SLO",
-        "Monitor-based SLOでBurn Rateだけを観測",
-        "Logsのcount-by-status",
-        "CIのテスト件数で代用"
+        "good=(latency≤300ms件数)/total=(全件数) の Metric-based SLO",
+        "Monitor-based SLO で Burn Rate だけを継続観測し件数情報は一切使わない方式",
+        "Logs から status コード別の count を取り、その比率を代用するというやり方",
+        "CI で実行したテスト件数の合格率をそのままレイテンシSLOの代替値とする方式"
       ],
       "answer": 0,
       "explanation": "条件を満たすリクエスト数/総リクエスト数として比率を取り、Metric-based SLOで目標化するのが定番です。"
@@ -1320,9 +1320,9 @@
       "question": "SLO Burn Rate Alertを使うメリットとして最も適切なのは?",
       "choices": [
         "Error Budgetを使い切る前に、消費速度が異常な時点で早期に通知できる",
-        "monitorを永久にmuteできる",
-        "ストレージを節約できる",
-        "DNSを高速化できる"
+        "対象モニターを一度設定しさえすれば、未来永劫muteしたまま運用できる便利機能",
+        "Logsストレージの保存量を継続的に節約して、月額コストを大幅に減らすための機能",
+        "DNSリゾルバの応答速度を高速化して、Webサイトのレイテンシを改善するための機能"
       ],
       "answer": 0,
       "explanation": "Burn Rateで早期警戒し、消費速度が高い段階で気づけるためインシデント対応が早まります。"
@@ -1333,10 +1333,10 @@
       "level": 2,
       "question": "SLOにおける「Good/Total」モデルの注意点として正しいのは?",
       "choices": [
-        "Goodの分母(対象母集団)を明確に定義しないと値が信用できない",
-        "Totalは常に1で固定",
-        "Goodは常にp95と同義",
-        "両者をTime Seriesで割り算するとTagが必ず保持される"
+        "Goodの分母(対象母集団)を明確に定義しないと値が信用できなくなる",
+        "Total件数は常に1に固定されるので、絶対値ではなく相対値しか扱えなくなる",
+        "Good件数は計測のたびに自動的にp95と同義の値へ変換され、件数とは扱われない",
+        "Time Seriesでgood/totalを割り算するとtag情報は必ず完全に保持されるという仕様"
       ],
       "answer": 0,
       "explanation": "対象母集団(健康な依存先・除外条件)を曖昧にすると見た目のSLOが信用できなくなります。"
@@ -1349,9 +1349,9 @@
       "question": "30日 99.9% SLO で Multi-window/Multi-burn rate Alertingを設計する際の典型例として正しいのは?",
       "choices": [
         "短期(例 5分・1時間)と長期(例 1時間・6時間)を組み合わせ、両方が同時にburn rateを超えた場合にPage",
-        "1時間ウィンドウだけ使う",
-        "1秒ごとに通知",
-        "Error Budgetを無視"
+        "1時間ウィンドウだけを用いた単一しきい値のアラートを永続的に運用する設計で、複数ウィンドウは使用しない",
+        "1秒ごとに評価して即座に通知する超高頻度設計を採用し、ノイズの多さよりも即応性を最大限に優先する",
+        "Error Budgetの概念をアラート設計から完全に排除し、SLO達成率の絶対値のみで通知するシンプルな構成"
       ],
       "answer": 0,
       "explanation": "Google SRE準拠のMulti-window/Multi-burn rate設計で、短期+長期burn rateの組合せがfalse positive/negativeを抑えます。"
@@ -1363,9 +1363,9 @@
       "question": "Composite SLO (複数SLOを組み合わせる)の利点として最も適切なのは?",
       "choices": [
         "上位サービスの『複合的信頼性』を、依存SLOを論理的に合成して評価できる",
-        "Error Budgetが自動で2倍",
-        "MonitorがGUIで生成される",
-        "全サービスを単一SLOに丸める"
+        "Error Budgetを定義しなくても自動的に2倍に増え、各サービスの予算が常に余る状態を維持できる",
+        "対象モニターがUIから自動生成され、SREエンジニアの設計レビュー作業を省略できるようになる",
+        "組織内の全サービスを必ずひとつの巨大なSLOへとまとめて、個別SLOを廃止することが必須となる"
       ],
       "answer": 0,
       "explanation": "Composite SLOで上位ジャーニーの信頼性を、依存SLOの組合せから算出できます。"
@@ -1376,10 +1376,10 @@
       "level": 3,
       "question": "Latency SLOでp95ではなくp99を選ぶことの典型的な意味は?",
       "choices": [
-        "テール側の体験により厳格になる代わりにbudget消費がブレやすくなる",
-        "Error Budgetが必ず2倍になる",
-        "RUMで取れなくなる",
-        "Monitor-basedになる"
+        "テール側の体験により厳格になる代わりに、budget消費が外れ値の影響でブレやすくなる",
+        "Error Budgetが必ず自動的に2倍へ拡張され、消費速度が常に半分以下に抑えられるようになる",
+        "RUMからの計測値がp99に対応していないため、RUM由来のSLIとしては実質的に使えなくなる",
+        "SLOの算出方式がMonitor-basedにしか対応しなくなり、Metric-basedでは指定できなくなる"
       ],
       "answer": 0,
       "explanation": "p99はテール体験に敏感ですが、外れ値の影響を受けやすくEB消費が不安定になる傾向があります。"
@@ -1390,10 +1390,10 @@
       "level": 3,
       "question": "SLOで対象母集団(qualifier)を絞る正しい目的は?",
       "choices": [
-        "Bot/サーバー間ヘルスチェック等を除外し、エンドユーザー体験に絞った真の信頼性指標を作る",
-        "monitorを全部muteする",
-        "tagを増やしてコストを高める",
-        "誰にも通知しない"
+        "Bot/サーバー間ヘルスチェック等のノイズを除外し、エンドユーザー体験に絞った真の信頼性指標を作る",
+        "対象モニターをすべて完全にmuteしてしまうことで、SLOの達成率を一律で100%に固定し続けるため",
+        "タグを大量に追加することで意図的にコストを増やし、社内予算消化の指標として活用するためのもの",
+        "障害発生時に通知が誰にも届かないように設計するための、SREチームの隠蔽用ベストプラクティス"
       ],
       "answer": 0,
       "explanation": "qualifierで母集団を絞ることで、本物のユーザー体験に基づくSLIを定義できます。"
@@ -1404,10 +1404,10 @@
       "level": 3,
       "question": "Error Budget Policy の典型的内容として適切なのは?",
       "choices": [
-        "予算超過時の新機能フリーズ、Postmortem必須、SREのバランス再交渉などの行動規範",
-        "API Keyのlocalstorageへのコピー",
-        "Severityラベルの自動付与のみ",
-        "全モニターのmute"
+        "予算超過時の新機能フリーズ、Postmortem必須、SREと開発のバランス再交渉などの行動規範",
+        "DatadogのAPI Keyを開発者全員のlocalStorageにコピーして簡単に使えるようにする運用規定",
+        "全アラートに重大度(Severity)ラベルを自動付与するだけのシンプルな運用ルールに限定される",
+        "SLO違反を検知した瞬間に組織内の全モニターを永続的にmuteしてしまう自動運用のポリシー"
       ],
       "answer": 0,
       "explanation": "Error Budget Policyは消費レベルに応じてリスク行動を制限する組織的ルールです。"
@@ -1419,10 +1419,10 @@
       "level": 1,
       "question": "Datadog Agentで新しいIntegrationを有効化する一般的な方法は?",
       "choices": [
-        "conf.d/<integration>.d/conf.yamlを編集してAgentを再起動",
-        "DBスキーマを変更",
-        "Lambdaを再パッケージング",
-        "DNSキャッシュをクリア"
+        "conf.d/<integration>.d/conf.yaml を編集し Agent を再起動",
+        "対象 DB のスキーマを変更し、新しいテーブルを追加することで有効化する手順",
+        "AWS Lambda を再パッケージングしレイヤとして配布し直すことで有効化する手順",
+        "OS の DNS キャッシュを強制クリアすることでインテグレーションが有効化される"
       ],
       "answer": 0,
       "explanation": "Agentのconf.d配下にYAMLを設置することでインテグレーションが有効化されます。"
@@ -1433,10 +1433,10 @@
       "level": 1,
       "question": "「自動インストゥルメンテーション」とは?",
       "choices": [
-        "コード変更なしにAPMトレース等を取得できる仕組み",
-        "AgentがCPUを自動最適化",
-        "RUMをAIで生成",
-        "ログを音声化"
+        "コードを変更せずにAPMトレース等を自動取得できる仕組み",
+        "Datadog AgentがCPU使用率を自動的に最適化してくれる機能",
+        "AIが自動でRUMセッションを生成し、テストとして再利用する機能",
+        "出力された全ログを音声合成で読み上げるための運用支援用の機能"
       ],
       "answer": 0,
       "explanation": "Single Step Instrumentation等の機能で、コードに手を入れず自動でトレース計装ができます。"
@@ -1447,10 +1447,10 @@
       "level": 1,
       "question": "「Webhook」インテグレーションの主用途は?",
       "choices": [
-        "アラート等のイベントを任意のHTTPエンドポイントへ転送",
-        "CPUを冷却",
-        "RDSをshardingする",
-        "DNSをproxyする"
+        "アラート等のイベントを任意のHTTPエンドポイントへ転送する",
+        "サーバーのCPUを冷却するための物理ファン制御コマンドを送信する",
+        "RDSデータベースを動的にshardingするための負荷分散を実現する仕組み",
+        "DNSリゾルバの代わりにDatadogが名前解決のproxyとして動く特別な機能"
       ],
       "answer": 0,
       "explanation": "WebhookでDatadogイベントを任意のシステム(Slack/JIRA/PagerDuty等)に渡せます。"
@@ -1462,9 +1462,9 @@
       "question": "DogStatsD の基本用途は?",
       "choices": [
         "アプリからUDP/UDSでカスタムメトリクスをAgentに送るプロトコル",
-        "ブラウザのCookie保存",
-        "DBのbinlog収集",
-        "DNSキャッシュのフラッシュ"
+        "ブラウザのCookie保存領域に独自データを書き込むためのクライアントAPI",
+        "DBサーバのbinlogをリアルタイムで収集し転送するためのレプリケーション機能",
+        "OSのDNSリゾルバキャッシュを強制的にフラッシュするためのコマンドラインツール"
       ],
       "answer": 0,
       "explanation": "DogStatsDはStatsD互換プロトコルで、各種言語SDKからカスタムメトリクスを送れます。"
@@ -1475,10 +1475,10 @@
       "level": 1,
       "question": "Unified Service Taggingで必須の3つのキーは?",
       "choices": [
-        "env, service, version",
-        "owner, secret, env",
-        "stage, region, tenant",
-        "team, customer, level"
+        "env / service / version",
+        "owner / secret / env",
+        "stage / region / tenant",
+        "team / customer / level"
       ],
       "answer": 0,
       "explanation": "env/service/versionでメトリクス・ログ・トレースを横断的に紐付けます。"
@@ -1490,10 +1490,10 @@
       "level": 2,
       "question": "AWSとDatadogを連携してCloudWatchメトリクスを取得する一般的な方法は?",
       "choices": [
-        "IAMロール経由でDatadog AWS Integrationを設定(クロスアカウントRole)",
-        "EC2にPython 2を入れる",
-        "S3を公開設定する",
-        "Route53に手動でAレコード追加"
+        "IAMロール経由でDatadog AWS Integrationを設定(クロスアカウントRole)する",
+        "監視対象のEC2に古いPython 2系のインタプリタをインストールし手動でpushする方式",
+        "S3バケットを意図的にパブリック公開設定にして、外部からスクレイピングさせる方式",
+        "Route53にAレコードを手動追加することでCloudWatchメトリクスの取得を有効化する"
       ],
       "answer": 0,
       "explanation": "DatadogのAWS Integrationでクロスアカウント用IAMロールを設定し、CloudWatchメトリクス等を取得します。"
@@ -1504,10 +1504,10 @@
       "level": 2,
       "question": "OpenTelemetry経由でDatadogにテレメトリを送る方法として正しいのは?",
       "choices": [
-        "OTLP受信を有効にしたDatadog AgentまたはOTel CollectorのDatadog exporterで送信",
-        "RDSに直接書き込む",
-        "Webhookで画像を送る",
-        "RUMサーバーに直接POST"
+        "OTLP受信を有効にしたDatadog Agent、またはOTel CollectorのDatadog Exporterで送信する",
+        "RDSデータベースに OTLP データを直接書き込み、後で別ツールから取り出して Datadog へ転送する",
+        "OTel SDKが生成したテレメトリをWebhook経由で画像として Datadog のUIへPOSTする運用にする",
+        "OTLPメッセージをRUMサーバへ直接POSTし、サーバ側でAPMトレースに変換して保存させる方式"
       ],
       "answer": 0,
       "explanation": "AgentはOTLPエンドポイントを公開でき、OTel Collector経由でも送信可能です。"
@@ -1519,9 +1519,9 @@
       "question": "AWS Lambdaの観測でDatadog Extension Layerを使う利点は?",
       "choices": [
         "Lambda外部にforwarderを置かずに、ローカルでメトリクス/ログ/トレースを集約送信できる",
-        "Lambdaを永続化する",
-        "JVM必須にできる",
-        "DNSを高速化する"
+        "Lambda関数を自動的に永続プロセス化して、コールドスタートを実質ゼロにする魔法のような機能",
+        "Lambda関数のランタイムをJVMに強制的に変換し、Java以外の言語を一切実行できなくさせる仕組み",
+        "Lambda関数からのDNS解決を高速化することで、外部API呼び出しのレイテンシだけを最適化する"
       ],
       "answer": 0,
       "explanation": "Datadog Extensionは関数内でAgent的に動作し、リクエスト毎のlatency最適化と統合送信が可能です。"
@@ -1532,10 +1532,10 @@
       "level": 2,
       "question": "Pythonの自動計装でWSGI/ASGIフレームワークをサポートさせるためのコマンドは?",
       "choices": [
-        "ddtrace-run <your_command>(またはimport ddtrace.auto)",
-        "pip uninstall ddtrace",
-        "datadog disable=true",
-        "yarn add ddtrace"
+        "ddtrace-run <your_command>(または import ddtrace.auto を起動時に評価)",
+        "pip uninstall ddtrace を実行してから アプリを起動することで計装が自動的に有効化される",
+        "環境変数で datadog disable=true を設定してから アプリを起動すると逆に計装が走り始める",
+        "yarn add ddtrace で依存追加するだけで Python アプリにも自動計装が組み込まれる仕様"
       ],
       "answer": 0,
       "explanation": "ddtrace-runでアプリ起動時に自動patchが有効化されます。import ddtrace.autoでも可能です。"
@@ -1546,10 +1546,10 @@
       "level": 2,
       "question": "JMX Integration(JMXFetch)で監視対象のBeanを指定する場所は?",
       "choices": [
-        "conf.d/jmx.d/conf.yaml のinstances/include設定",
-        "JREの環境変数だけ",
-        "OSのhostsファイル",
-        "DNSのSOAレコード"
+        "conf.d/jmx.d/conf.yaml の instances と include 設定で指定する",
+        "JREの環境変数だけで指定し、conf.yaml は一切編集しない構成で機能する",
+        "OS の /etc/hosts ファイルに Bean 名を列挙することで JMXFetch が解釈する",
+        "DNS の SOA レコードに Bean のパスを書き込んで JMX 経由で同期する仕組み"
       ],
       "answer": 0,
       "explanation": "JMX Integrationはinstancesでホスト指定、include/excludeで対象Beanを定義します。"
@@ -1560,10 +1560,10 @@
       "level": 2,
       "question": "Pipeline(Logs Pipeline)でログをパースする際に使えるプロセッサとして適切なのは?",
       "choices": [
-        "Grok Parser, JSON Parser, Geo IP Parser, Lookup Processor",
-        "RUM Recorder, Synthetic Test",
-        "S3 Lifecycle, EBS Snapshot",
-        "DNS forwarder, ACME issuer"
+        "Grok Parser / JSON Parser / Geo IP Parser / Lookup Processor",
+        "RUM Recorder / Synthetic Test Engine / DOM Replay Generator",
+        "S3 Lifecycle Rule / EBS Snapshot Scheduler / EFS Replicator",
+        "DNS Forwarder / ACME Issuer / SMTP Relay / NTP Synchronizer"
       ],
       "answer": 0,
       "explanation": "Logs PipelineはGrok/JSON/GeoIP/Lookup等のProcessorで構造化・エンリッチを行います。"
@@ -1575,10 +1575,10 @@
       "level": 3,
       "question": "Kubernetes環境でAdmission ControllerによるAuto Instrumentationを使う利点は?",
       "choices": [
-        "Pod作成時にトレーサが自動的にinjectされ、アプリ側の変更が不要",
-        "DBクエリが自動的に最適化される",
-        "OS自体が高速化される",
-        "全Podが必ず単一nodeに集約される"
+        "Pod作成時にトレーサが自動的にinjectされ、アプリ側のコード変更や再ビルドが一切不要",
+        "Datadog AdmissionによってDBクエリが自動的に書き換えられ、性能が劇的に最適化される効果",
+        "Auto Instrumentationの副産物としてホストOSの全体性能が自動で大幅に高速化されるという仕様",
+        "全Podが必ず単一の特定ノードへスケジュールされ、リソースが1台に集約されるようになる動作"
       ],
       "answer": 0,
       "explanation": "Cluster Agentのadmission controllerでinit containerやenv varを自動injectし、コードレスで計装できます。"
@@ -1589,10 +1589,10 @@
       "level": 3,
       "question": "Single Step Instrumentation (SSI) をホスト側(非k8s)で使う場合の典型構成は?",
       "choices": [
-        "Agentが言語ランタイムを検出しトレーサを注入(例: LD_PRELOAD相当の仕組み)",
-        "GitHubのwebhookをローカルに転送",
-        "全サービスをC++に書き換える",
-        "DBインデックスを再構築"
+        "Agentが対象の言語ランタイムを自動検出し、LD_PRELOAD相当の仕組みでトレーサを注入する",
+        "GitHubのwebhookを開発者個人のローカル端末へ転送し、その情報を起点として計装を有効化する",
+        "監視対象のサービスを全てC++言語に書き換えてから再コンパイルすることが前提条件として必要",
+        "DB側のインデックスを再構築することで、間接的にAgentがアプリの計装位置を把握する仕組み"
       ],
       "answer": 0,
       "explanation": "SSIはAgentが対象ランタイムを検出してトレーサのattachを自動化します(SSI hostモード)。"
@@ -1603,10 +1603,10 @@
       "level": 3,
       "question": "OTel Collector + Datadog Exporter 構成で、サービス名やenvタグが反映されない場合に確認すべき設定は?",
       "choices": [
-        "resource attributes(service.name, deployment.environment等)とexporterのhostname_source/tag mapping",
-        "OS Wi-Fi設定",
-        "DBインデックス",
-        "DNSのTTLのみ"
+        "resource attributes と exporter の hostname_source / tag mapping 設定",
+        "OS の Wi-Fi 接続設定(SSID やパスワード等)が正しく構成されているかをまず最初に確認すべき作業項目",
+        "対象アプリが利用している DB のインデックスが今まさに再構築中でないかを優先的に確認する作業手順",
+        "DNS の TTL 値だけ確認すれば十分で、Collector や Exporter の設定との関係は一切ないとする方針"
       ],
       "answer": 0,
       "explanation": "OTelのresource attributesがDatadog側のservice/envタグへ正しくマップされるか確認が必要です。"
@@ -1617,10 +1617,10 @@
       "level": 3,
       "question": "Sidecar AgentでなくAdmission Controllerによる自動計装の方が好まれる主要理由は?",
       "choices": [
-        "サイドカー追加によるリソースオーバーヘッドと運用複雑性を避けられる",
-        "Podが必ず外部公開される",
-        "Probe を完全になくせる",
-        "ノード数が0になる"
+        "サイドカー追加によるPodあたりのリソースオーバーヘッドと運用複雑性を避けられるから",
+        "Admission Controllerを使うと、全Podが必ず外部公開ロードバランサ経由でアクセスされるから",
+        "Liveness/Readiness Probe を Pod 仕様から完全に削除して構成を簡素化できるようになるから",
+        "監視対象クラスタのノード数を実質ゼロまで圧縮できるという、運用コスト面での極端な利点から"
       ],
       "answer": 0,
       "explanation": "サイドカーは1Podごとに別コンテナを増やしますが、Admission Controllerは1Cluster Agentで完結します。"
@@ -1631,10 +1631,10 @@
       "level": 3,
       "question": "AWS Integrationのメトリクス収集を最低限の遅延で行うために検討する方式は?",
       "choices": [
-        "CloudWatch Metric Streams 経由でほぼリアルタイムにDatadogへ送る",
-        "Cron で1日1回 push する",
-        "S3 IA に保存して2週間後に取り込む",
-        "Route53のヘルスチェックだけに依存"
+        "CloudWatch Metric Streams 経由(Firehose)でほぼリアルタイムにDatadogへ送る",
+        "Cronジョブを使い1日に1度だけまとめてメトリクスをpushする省コスト寄りの運用方式",
+        "メトリクスをまずS3 Infrequent Access層に蓄積し、約2週間後にDatadogへ取り込む方式",
+        "Route53のヘルスチェックの結果だけに依存してCloudWatchメトリクスの代用とする方式"
       ],
       "answer": 0,
       "explanation": "Metric Streams(Firehose)経由ならpollingより低遅延でCloudWatchメトリクスを取り込めます。"
@@ -1645,10 +1645,10 @@
       "level": 3,
       "question": "Datadog APIキー/Appキーの組み合わせで、UIではなくAPI/CLIから操作する一般的なシナリオは?",
       "choices": [
-        "Monitor/Dashboard/SLO/Pipelineの宣言的管理(Terraform/datadog-cli)",
-        "EC2の電源OFF",
-        "RDSのDDL",
-        "Route53へのドメイン委任"
+        "Monitor / Dashboard / SLO / Pipeline などのリソースを Terraform Provider や datadog-ci で宣言的に管理する運用",
+        "対象 AWS アカウント内の EC2 インスタンスの物理電源を Datadog から直接 OFF/ON する自動運用シナリオを実装する",
+        "本番 RDS の DDL (CREATE TABLE / ALTER TABLE 等) を Datadog 経由で一斉に流し込む変更管理スクリプトを動かす運用",
+        "Route53 で管理しているドメインを別の DNS プロバイダへ委任する手続きを Datadog API 経由で自動化する用途のために使う"
       ],
       "answer": 0,
       "explanation": "Terraform Datadog Providerやdatadog-ciでMonitor/Dashboard/SLO等をコードで管理するのが一般的です。"
@@ -1660,10 +1660,10 @@
       "level": 3,
       "question": "[ボス戦] 大規模APMで「全Span100%取り込み + 必要なTraceだけ長期保存」を実現したい場合、組み合わせる代表的機能は?",
       "choices": [
-        "Ingestion Control(head-based sampling)で取り込み量を制御 + Retention Filtersで重要TraceをIndex化",
-        "全SpanをローカルファイルにgzipしてS3にput",
-        "RUMセッションを暗号化",
-        "DBにbinlogとして書き出し"
+        "Ingestion Control で取り込み制御 + Retention Filters で重要 Trace を Index 化",
+        "全 Span を各アプリのローカルファイルに gzip 圧縮で書き出して、cron で S3 バケットへ put して長期保存問題を回避するパターン",
+        "RUM セッション全体を独自鍵で完全に暗号化することによって、結果的に APM の長期保存コストが下がるという副次効果に依存する運用",
+        "全 Span を MySQL の binlog として書き出した後、別ツールで集計し直してから Datadog APM に再投入する二段構成のパイプライン"
       ],
       "answer": 0,
       "explanation": "head-basedで取り込み制御し、Retention Filtersでエラー・遅延等の重要トレースを長期保持するのが王道。"
@@ -1674,10 +1674,10 @@
       "level": 3,
       "question": "[ボス戦] ASMでログイン総当たり攻撃をリアルタイムでブロック+脅威スコアに反映するための実装は?",
       "choices": [
-        "ddtrace ASM API で set_user / track_login_event を計装し、Detection Ruleで閾値を超えたユーザー/IPをblock_*でブロック",
-        "DBにバックアップを取って終了",
-        "DNSキャッシュをクリア",
-        "RUM SDKを無効化"
+        "set_user / track_login_event を計装し、Detection Rule の閾値超過時に block_* でブロック",
+        "対象 DB のスナップショットを定期取得し続けることを対応完了とみなし、ログイン総当たりの検知やブロックには追加対策が要らないと割り切る方針",
+        "OS や Pod 側の DNS キャッシュを継続的にクリアし続けることで、攻撃者側の名前解決を妨害して総当たりを実質無効化するという運用に切り替える方針",
+        "ブラウザ側で動作している RUM SDK の動作を全て無効化することで、攻撃ログ収集自体をやめてしまい検出と対応の手間そのものを根本からなくす運用方針"
       ],
       "answer": 0,
       "explanation": "ASMはユーザー識別+ログインイベント計装で攻撃者の振る舞いを学習・ブロック可能です。"
@@ -1688,10 +1688,10 @@
       "level": 3,
       "question": "[ボス戦] SLOで「ユーザー体験を反映する真のSLI」を作る際の最重要原則は?",
       "choices": [
-        "対象母集団(qualifier)を明確化し、合成トラフィックや健康確認等のノイズを除外",
-        "全リクエストをまとめて1つのSLIにする",
-        "Latencyはp100だけを見る",
-        "Monitor-basedに統一する"
+        "対象母集団(qualifier)を明確化し、合成トラフィックやヘルスチェック等のノイズを丁寧に除外する",
+        "本番リクエストを成功/失敗の区別なく全て1つのSLIに合算してしまい、達成率を見かけ上高く保つ",
+        "レイテンシSLIには常に最大値(p100)だけを採用し、p95やp99などの分位点は一切使わないと固定する",
+        "あらゆるSLOをMonitor-basedに統一すべきと宣言し、Metric-basedの計算方式は組織として禁止する方針"
       ],
       "answer": 0,
       "explanation": "qualifierと母集団の明確化はSLI設計の最重要原則で、ノイズを除いた信頼できる指標を作ります。"
@@ -1702,10 +1702,10 @@
       "level": 3,
       "question": "[ボス戦] LLMアプリで品質劣化を継続検出するMLOps的ループとして適切なのは?",
       "choices": [
-        "本番Spanからサンプル抽出 → Evaluations実行 → 失敗パターンをDataset化 → プロンプト/モデル改良 → 比較計測",
-        "全データをログに出して終了",
-        "DBインデックスを毎晩貼り直す",
-        "RUM Replay を全部zipで保存"
+        "本番 Span からサンプル抽出 → Evaluations 実行 → 失敗パターンを Dataset 化 → プロンプト/モデル改良 → 比較計測のループ",
+        "全データを単純にローカルログファイルへ書き出して保存しておくだけにとどめ、それ以上の継続的な評価や改善のループは構築しない運用",
+        "対象アプリが利用している DB のインデックスを毎晩貼り直し続けることで、間接的に LLM の出力品質が継続改善することを期待する運用方針",
+        "RUM Session Replay 形式の動画ファイルを全件 ZIP 圧縮して長期保管しておきさえすれば、品質劣化の継続検出には十分だと判断する方針"
       ],
       "answer": 0,
       "explanation": "LLM Obsは観測→評価→Dataset→改良→比較のループを高速化し、品質ドリフト対策の基盤になります。"
@@ -1716,10 +1716,10 @@
       "level": 3,
       "question": "[ボス戦] デプロイ起因の本番障害を「コミット粒度」まで遡るために組み合わせる機能は?",
       "choices": [
-        "Deployment Marker(env/service/version)+ Source Code Integration + CI Visibility(Pipeline/Test)",
-        "PRをすべてrevertする自動化のみ",
-        "DNS TTLを1秒にする",
-        "Logsをすべて削除する"
+        "Deployment Marker + Source Code Integration + CI Visibility の組合せ",
+        "本番で問題が起きた瞬間に開いているPRを片っ端から全部revertする全自動防御スクリプトに依存する方針",
+        "DNS の TTL を1秒まで短縮しておけば、デプロイ起因の本番障害が起きてもすぐに切り戻せると考える方針",
+        "Logs を定期的に全削除して履歴を最小化し、コミット粒度の追跡は諦めて事後対応に集中する方針に切替"
       ],
       "answer": 0,
       "explanation": "Deployment Marker→Source Code Integration→CI Visibilityへの導線で、障害を該当commit・Pipelineに辿れます。"
@@ -1730,10 +1730,10 @@
       "level": 3,
       "question": "[ボス戦] Kubernetes本番運用で観測ノイズを抑える tag戦略として最も適切なのは?",
       "choices": [
-        "Unified Service Taggingを徹底し、高カーディナリティ値(個別ID等)はタグではなく属性として扱う",
-        "全Podの名前を完全乱数にする",
-        "tagを使わずsuffixで識別する",
-        "tagの数を制限せず無限に増やす"
+        "Unified Service Taggingを徹底し、ユーザーIDなど高カーディナリティな値はタグではなくspan/log属性として扱う",
+        "Pod 名を全て完全乱数の文字列に変更し続けることで、タグの一意性を維持し続けるという過激な運用に切り替える",
+        "tag機構を使わずファイル名や Pod 名の suffix だけでサービス境界を識別する原始的な方法に完全に統一してしまう",
+        "tagの数や種類を運用ルールで制限することなく、思いつくものを何でも自由に無限に増やしてもよいと宣言する方針"
       ],
       "answer": 0,
       "explanation": "高カーディナリティはコスト・性能の主要原因。Unified Service Taggingで安定したディメンションを保ち、IDは属性に。"
@@ -1744,10 +1744,10 @@
       "level": 3,
       "question": "[ボス戦] OTel SDK採用とDatadogトレーサ採用のトレードオフとして正しいのは?",
       "choices": [
-        "OTelはベンダ中立性に強くベンダ機能はexporter依存、Datadogトレーサは最適化済みでDatadog機能(Profiler/ASM/CIなど)との統合が深い",
-        "両者は完全に同一機能",
-        "OTelはDatadogへ送れない",
-        "DatadogトレーサはOSSではない"
+        "OTel SDKはベンダ中立性に強くベンダ固有機能は exporter 依存、Datadogトレーサは最適化済みで Profiler/ASM/CI 等との統合が深い",
+        "両者は実装も機能も完全に同一であり、ドキュメント上で名前が違うだけのまったく同じソフトウェアを指しているという関係性にあるとされる",
+        "OTel SDKを採用してしまった場合は、技術的にDatadogへテレメトリを送信することが完全に不可能になるという明確な制約が存在するとされる",
+        "Datadogトレーサ自体がクローズドなプロプライエタリBlobとしてのみ提供されていて、ソースコードは外部に一切公開されていないという制約がある"
       ],
       "answer": 0,
       "explanation": "OTelは中立性、Datadogトレーサは深い統合・ベンダ最適化が利点。両者は組合せ可能です。"
@@ -1758,10 +1758,10 @@
       "level": 3,
       "question": "[ボス戦] RUMでカスタム属性をPIIマスクしながら付与する妥当な実装は?",
       "choices": [
-        "addAction/addError等にcontextを渡し、Sensitive Data Scannerでマスク + beforeSendでクライアント側フィルタ",
-        "RUM SDKをサーバーで実行",
-        "全データをローカルストレージに保存して送信しない",
-        "URLにPIIをそのままクエリ文字列で送る"
+        "addAction / addError に context を渡し、SDS と beforeSend で二重マスクする",
+        "RUM SDK をサーバープロセスとして常駐実行し、ブラウザ側から個人情報を含むテレメトリが一切送信されない構成にしてしまう方針",
+        "RUM で取得したすべてのデータをブラウザのローカルストレージにのみ保存しておき、Datadogサーバへは一切送信しないという運用方針",
+        "URL のクエリ文字列に氏名やメールアドレスなどの PII 情報をそのまま埋め込んで送信してしまうという、極めて単純な実装で済ませる方法"
       ],
       "answer": 0,
       "explanation": "RUM SDKのbeforeSendで送信前フィルタ、サーバ受信後はSDSで二重防御するのが堅牢です。"

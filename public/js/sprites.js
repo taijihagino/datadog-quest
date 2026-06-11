@@ -67,6 +67,14 @@ const BOSS_SPRITE = {
   flavor: 'Bitsを名乗りDatadog王国を闇に染めた偽物の魔王!'
 };
 
+// 本物のBits(囚われていた王国の妖精) - エンディングで救出される
+const TRUE_BITS = {
+  emoji: '🐶',
+  bigEmoji: '🐶✨',
+  name: 'まことの BITS',
+  flavor: 'DARK BITSに長い間とらわれていた本物のBits。光をとりもどした!'
+};
+
 // 各カテゴリにあてはまる敵のカテゴリヒント(出題時に使う)
 const CATEGORY_BY_ENEMY = {
   slime: 'apm_rum',

@@ -1,14 +1,17 @@
 // ===== Datadog Quest - 問題ロジック =====
 
 const QuestionBank = {
-  data: null,
+  ja: null,
+  en: null,
   asked: new Set(),
 
   async load() {
     const res = await fetch('/api/questions');
     if (!res.ok) throw new Error('問題データの読み込みに失敗しました');
-    this.data = await res.json();
-    return this.data;
+    const j = await res.json();
+    this.ja = j.ja;
+    this.en = j.en;
+    return j;
   },
 
   reset() {
@@ -19,9 +22,16 @@ const QuestionBank = {
     this.asked = new Set(askedIds || []);
   },
 
-  /**
-   * 選択肢の順序をシャッフルし正解indexを更新したコピーを返す。
-   */
+  // 言語に応じて問題のテキスト部分を差し替える
+  localize(q) {
+    const lang = (typeof I18n !== 'undefined' && I18n.lang) || 'ja';
+    if (lang === 'en' && this.en && this.en.questions && this.en.questions[q.id]) {
+      const tr = this.en.questions[q.id];
+      return { ...q, question: tr.question, choices: tr.choices, explanation: tr.explanation };
+    }
+    return q;
+  },
+
   shuffleChoices(q) {
     const indices = q.choices.map((_, i) => i);
     for (let i = indices.length - 1; i > 0; i--) {
@@ -33,15 +43,10 @@ const QuestionBank = {
     return { ...q, choices: newChoices, answer: newAnswer };
   },
 
-  /**
-   * 敵のカテゴリヒントとレベルに合致する問題を1問選ぶ。
-   * 一度出題された問題はなるべく避ける。
-   */
   pickForEnemy(enemyTypeKey, level) {
-    const all = this.data.questions;
+    const all = this.ja.questions;
     const primaryCat = CATEGORY_BY_ENEMY[enemyTypeKey];
 
-    // 一定確率でSLO等の横断カテゴリも混ぜる
     let categoryPool = [primaryCat];
     if (Math.random() < 0.25) {
       categoryPool = categoryPool.concat(CROSS_CATEGORY_POOL);
@@ -53,40 +58,42 @@ const QuestionBank = {
       !q.id.startsWith('boss_')
     );
 
-    // 未出題のものを優先
     const fresh = candidates.filter(q => !this.asked.has(q.id));
     const pickFrom = fresh.length > 0 ? fresh : candidates;
 
     if (pickFrom.length === 0) {
-      // フォールバック: 同レベルの何でも
       const fallback = all.filter(q => q.level === level && !q.id.startsWith('boss_'));
       const fb = fallback.filter(q => !this.asked.has(q.id));
       const choice = (fb.length > 0 ? fb : fallback)[Math.floor(Math.random() * (fb.length > 0 ? fb : fallback).length)];
       this.asked.add(choice.id);
-      return this.shuffleChoices(choice);
+      return this.shuffleChoices(this.localize(choice));
     }
 
     const chosen = pickFrom[Math.floor(Math.random() * pickFrom.length)];
     this.asked.add(chosen.id);
-    return this.shuffleChoices(chosen);
+    return this.shuffleChoices(this.localize(chosen));
   },
 
-  /**
-   * ボス用の問題プールからランダムに5問を返す
-   */
   pickForBoss(count = 5) {
-    const pool = this.data.questions.filter(q => q.id.startsWith('boss_'));
-    // Fisher-Yatesで配列をシャッフル
+    const pool = this.ja.questions.filter(q => q.id.startsWith('boss_'));
     const shuffled = pool.slice();
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return shuffled.slice(0, Math.min(count, shuffled.length)).map(q => this.shuffleChoices(q));
+    return shuffled.slice(0, Math.min(count, shuffled.length)).map(q => this.shuffleChoices(this.localize(q)));
   },
 
   categoryLabel(catKey) {
-    return this.data?.categories?.[catKey] || catKey;
+    if (typeof I18n !== 'undefined') {
+      const v = I18n.t('cat_' + catKey);
+      if (v && v !== 'cat_' + catKey) return v;
+    }
+    const lang = (typeof I18n !== 'undefined' && I18n.lang) || 'ja';
+    if (lang === 'en' && this.en && this.en.categories) {
+      return this.en.categories[catKey] || catKey;
+    }
+    return this.ja?.categories?.[catKey] || catKey;
   },
 
   getAskedIds() {

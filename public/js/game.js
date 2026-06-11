@@ -1,7 +1,6 @@
 // ===== Datadog Quest - メインゲームロジック =====
 
 const Game = {
-  hero: { hp: 10, maxHp: 10 },
   screen: 'title',
   initialized: false,
 
@@ -15,9 +14,11 @@ const Game = {
   _timerInterval: null,
 
   async init() {
+    I18n.init();
     SaveSystem.init();
     FieldMap.init();
     Battle.init();
+    I18n.onChange(() => this.applyI18n());
     try {
       await QuestionBank.load();
     } catch (e) {
@@ -25,16 +26,22 @@ const Game = {
       return;
     }
 
-    Battle.onVictory = (enemyId) => this.handleEnemyDefeated(enemyId);
-    Battle.onDefeat = ({ retreat } = {}) => this.showGameOver();
+    Battle.onVictory = (enemyId, info) => this.handleEnemyDefeated(enemyId, info);
     Battle.onBossDefeated = (stats) => this.showEnding(stats);
     Battle.onAnswered = ({ correct }) => this.recordAnswer(correct);
+    Battle.getStats = () => ({
+      correct: this.correctAnswered,
+      total: this.totalAnswered,
+      mistakes: Math.max(0, this.totalAnswered - this.correctAnswered)
+    });
 
     this.bindButtons();
     this.bindKeyboard();
     this.bindNameModal();
     this.bindRankingModal();
     this.bindIntro();
+    this.bindLangToggle();
+    this.applyI18n();
 
     const hasSave = await SaveSystem.hasSave();
     document.getElementById('continue-btn').disabled = !hasSave;
@@ -78,7 +85,7 @@ const Game = {
     const modal = document.getElementById('name-modal');
     const input = document.getElementById('name-input');
     document.getElementById('name-ok').addEventListener('click', () => {
-      const name = (input.value || '').trim().slice(0, 16) || 'ななしのゆうしゃ';
+      const name = (input.value || '').trim().slice(0, 16) || I18n.t('default_name');
       modal.classList.add('hidden');
       this.startNewGameWithName(name);
     });
@@ -96,6 +103,66 @@ const Game = {
     });
   },
 
+  bindLangToggle() {
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lang = btn.getAttribute('data-lang');
+        I18n.set(lang);
+      });
+    });
+  },
+
+  // data-i18n属性を持つ要素にI18nの文字列を適用
+  applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const txt = I18n.t(key);
+      if (txt && txt !== key) el.textContent = txt;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      const txt = I18n.t(key);
+      if (txt && txt !== key) el.innerHTML = txt;
+    });
+    // 言語ボタンのactive状態
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      const l = btn.getAttribute('data-lang');
+      btn.classList.toggle('active', l === I18n.lang);
+    });
+    // モーダル/フィールド等、JSが直接textを書いた箇所も更新
+    if (this.screen === 'field') {
+      this.updateHud();
+      this.setFieldMessage(I18n.t('field_default'));
+    }
+    // 名前入力モーダル(JSで開かれた時はtextが上書きされるので、HTML側はdata-i18n依存)
+    const nameTitleEl = document.querySelector('#name-modal .modal-header');
+    if (nameTitleEl) nameTitleEl.textContent = I18n.t('name_title');
+    const nameQEl = document.querySelector('#name-modal .modal-body p');
+    if (nameQEl) nameQEl.textContent = I18n.t('name_q');
+    const nameInput = document.getElementById('name-input');
+    if (nameInput) nameInput.placeholder = I18n.t('name_placeholder');
+    const nameNote = document.querySelector('#name-modal .modal-body p:last-of-type');
+    if (nameNote && nameNote !== nameQEl) nameNote.textContent = I18n.t('name_note');
+    const nameOk = document.getElementById('name-ok');
+    if (nameOk) nameOk.textContent = I18n.t('name_ok');
+    const nameCancel = document.getElementById('name-cancel');
+    if (nameCancel) nameCancel.textContent = I18n.t('name_cancel');
+    // ランキングモーダル
+    const rankH = document.querySelector('#ranking-modal .modal-header');
+    if (rankH) rankH.textContent = I18n.t('ranking_title');
+    const rankHelp = document.querySelector('#ranking-modal .ranking-help');
+    if (rankHelp) rankHelp.textContent = I18n.t('ranking_help');
+    const rankClose = document.getElementById('ranking-close');
+    if (rankClose) rankClose.textContent = I18n.t('ranking_close');
+    // ゲームオーバー(画面要素として残しているもの)
+    const goTitle = document.querySelector('#screen-gameover .ending-title');
+    if (goTitle) goTitle.textContent = I18n.t('gameover_title');
+    const goText = document.querySelector('#screen-gameover .ending-text');
+    if (goText) goText.innerHTML = I18n.t('gameover_text');
+    // ヘッダラベル(モーダル等)
+    document.title = I18n.lang === 'ja' ? 'Datadog Quest' : 'Datadog Quest';
+  },
+
   _introTimer: null,
   _introFullText: '',
 
@@ -105,22 +172,8 @@ const Game = {
   },
 
   showIntro() {
-    const name = this.playerName || 'ゆうしゃ';
-    const text =
-      `むかしむかし、Datadog王国には\n` +
-      `「Bits」と呼ばれる ちいさな ようせいが いた。\n` +
-      `Bitsは王国に メトリクスと トレースの 光を ともし、\n` +
-      `人々の くらしを まもっていた。\n\n` +
-      `しかし ある日―――\n\n` +
-      `Bitsを 名乗る にせもの 『DARK BITS』 が\n` +
-      `王の城に あらわれ、王国を のっとった。\n` +
-      `観測の光は うばわれ、王国に 闇が ひろがった。\n\n` +
-      `そんなとき、勇者 「${name}」 が 立ちあがった。\n` +
-      `「私が DARK BITS を たおし、世界に 平和を とりもどす!」\n\n` +
-      `さあ ${name} よ、 つるぎ を にぎりしめ、\n` +
-      `Datadog王国を 旅して、 12の 試練を のりこえよ。\n` +
-      `その先に まちうける DARK BITS との 決戦こそ、\n` +
-      `観測可能性(オブザーバビリティ)の 光を とりもどす かぎだ!`;
+    const name = this.playerName || (I18n.lang === 'en' ? 'Hero' : 'ゆうしゃ');
+    const text = I18n.t('intro_text', name);
 
     this.showScreen('intro');
     this._introFullText = text;
@@ -153,10 +206,9 @@ const Game = {
   },
 
   startAdventureAfterIntro() {
-    // フィールド表示の瞬間からプレイ時間計測開始
     this.startTimeMs = Date.now();
     this.enterField();
-    this.setFieldMessage(`${this.playerName} の冒険がはじまった! 全12の試練のあと、王城でDARK BITSが待つ!`);
+    this.setFieldMessage(I18n.t('field_start', { name: this.playerName }));
   },
 
   async handleAction(action) {
@@ -168,7 +220,7 @@ const Game = {
         await this.continueGame();
         break;
       case 'reset':
-        if (confirm('セーブデータを削除します。よろしいですか?')) {
+        if (confirm(I18n.t('confirm_reset'))) {
           await SaveSystem.clear();
           document.getElementById('continue-btn').disabled = true;
           document.getElementById('reset-btn').disabled = true;
@@ -204,10 +256,9 @@ const Game = {
   },
 
   async startNewGameWithName(name) {
-    this.playerName = name;
+    this.playerName = name || I18n.t('default_name');
     localStorage.setItem('datadog_quest_last_name', name);
 
-    this.hero = { hp: 10, maxHp: 10 };
     this.startTimeMs = 0; // フィールド表示後にセット
     this.totalAnswered = 0;
     this.correctAnswered = 0;
@@ -222,11 +273,10 @@ const Game = {
   async continueGame() {
     const data = await SaveSystem.load();
     if (!data) {
-      alert('セーブデータが見つかりません');
+      alert(I18n.t('no_save'));
       return;
     }
-    this.playerName = data.playerName || 'ななしのゆうしゃ';
-    this.hero = data.hero || { hp: 10, maxHp: 10 };
+    this.playerName = data.playerName || I18n.t('default_name');
     this.startTimeMs = data.startTimeMs || Date.now();
     this.totalAnswered = data.totalAnswered || 0;
     this.correctAnswered = data.correctAnswered || 0;
@@ -235,7 +285,7 @@ const Game = {
     FieldMap.restoreState(data.field);
     QuestionBank.restoreAsked(data.asked || []);
     this.enterField();
-    this.setFieldMessage(`${this.playerName} の冒険のつづきから...`);
+    this.setFieldMessage(I18n.t('field_continue', { name: this.playerName }));
   },
 
   enterField() {
@@ -276,18 +326,18 @@ const Game = {
       return;
     }
     if (result.entered === 'castle') {
-      this.setFieldMessage('王城に入った... 魔王ワン公が待ち構えている!');
+      this.setFieldMessage(I18n.t('field_castle_enter'));
       FieldMap.render();
       this.updateHud();
       setTimeout(() => this.startBoss(), 800);
       return;
     }
     if (result.reason === 'castle_locked') {
-      this.setFieldMessage(`王城は封印されている... 残り${12 - FieldMap.defeatedCount()}体の敵を倒せ!`);
+      this.setFieldMessage(I18n.t('field_castle_locked', { n: 12 - FieldMap.defeatedCount() }));
       return;
     }
     if (result.reason === 'block') {
-      this.setFieldMessage('木が生い茂っていて通れない。');
+      this.setFieldMessage(I18n.t('field_block'));
       FieldMap.render();
       return;
     }
@@ -296,18 +346,17 @@ const Game = {
     }
 
     FieldMap.render();
-    this.setFieldMessage('Datadog王国を歩いている...');
+    this.setFieldMessage(I18n.t('field_walking'));
   },
 
   startBattle(enemy) {
     this.showScreen('battle');
-    Battle.startNormal(enemy, this.hero);
+    Battle.startNormal(enemy);
   },
 
   startBoss() {
     this.showScreen('battle');
-    this.hero.hp = this.hero.maxHp; // ボス戦前回復
-    Battle.startBoss(this.hero);
+    Battle.startBoss();
   },
 
   recordAnswer(correct) {
@@ -315,28 +364,30 @@ const Game = {
     if (correct) this.correctAnswered++;
   },
 
-  async handleEnemyDefeated(enemyId) {
+  async handleEnemyDefeated(enemyId, info = {}) {
     FieldMap.markEnemyDefeated(enemyId);
     this.showScreen('field');
     FieldMap.render();
     this.updateHud();
-    this.setFieldMessage(`敵を倒した! 残り ${12 - FieldMap.defeatedCount()}体。`);
+    const remain = 12 - FieldMap.defeatedCount();
+    const mistakes = this.totalAnswered - this.correctAnswered;
+    const key = info.correct ? 'field_defeat_correct' : 'field_defeat_wrong';
+    this.setFieldMessage(I18n.t(key, { n: remain, m: mistakes }));
     await this.autoSave();
 
     if (FieldMap.allEnemiesDefeated()) {
-      this.setFieldMessage('全ての敵を倒した! 王城の封印が解かれた! 城へ向かおう。');
+      this.setFieldMessage(I18n.t('field_all_defeated'));
     }
   },
 
   async saveNow() {
     await this.autoSave();
-    this.setFieldMessage('セーブしました!(ローカル & サーバー)');
+    this.setFieldMessage(I18n.t('field_save_done'));
   },
 
   async autoSave() {
     const state = {
       playerName: this.playerName,
-      hero: this.hero,
       startTimeMs: this.startTimeMs,
       totalAnswered: this.totalAnswered,
       correctAnswered: this.correctAnswered,
@@ -354,7 +405,10 @@ const Game = {
 
   updateHud() {
     document.getElementById('hero-name').textContent = this.playerName || '-';
-    document.getElementById('hud-hp').textContent = `${this.hero.hp}/${this.hero.maxHp}`;
+    const mistakes = Math.max(0, this.totalAnswered - this.correctAnswered);
+    const acc = this.totalAnswered > 0 ? Math.round((this.correctAnswered / this.totalAnswered) * 100) : 100;
+    const hudMis = document.getElementById('hud-mistakes');
+    if (hudMis) hudMis.textContent = `${mistakes} (${acc}%)`;
     document.getElementById('hud-defeated').textContent = FieldMap.defeatedCount();
     this.updateTimeHud();
   },
@@ -363,11 +417,6 @@ const Game = {
     this.screen = name;
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-' + name).classList.add('active');
-  },
-
-  showGameOver() {
-    this.stopTimer();
-    this.showScreen('gameover');
   },
 
   async showEnding(bossStats) {
@@ -395,19 +444,30 @@ const Game = {
     await this.autoSave();
 
     const defeated = FieldMap.defeatedCount();
-    document.getElementById('ending-text').innerHTML =
-      `ゆうしゃ <strong>${escapeHtml(this.playerName)}</strong> は<br/>` +
-      `Datadog王国を旅して 全ての敵を倒し<br/>` +
-      `魔王ワン公の野望を打ち砕いた!<br/><br/>` +
-      `観測可能性(オブザーバビリティ)の光が<br/>` +
-      `王国の隅々まで広がった...`;
+    const safeName = escapeHtml(this.playerName);
+    const rescueEl = document.getElementById('rescue-scene');
+    if (rescueEl) {
+      rescueEl.innerHTML =
+        `<span class="narrator">${I18n.t('ending_rescue_intro')}</span>\n\n` +
+        `${I18n.t('ending_rescue_appear')}\n\n` +
+        `<span class="bits-line">${I18n.t('ending_bits_line', safeName)}</span>\n\n` +
+        `<span class="narrator">${I18n.t('ending_rescue_outro')}</span>`;
+    }
+
+    document.getElementById('ending-text').innerHTML = I18n.t('ending_text', safeName);
 
     document.getElementById('ending-stats').innerHTML =
-      `<div>クリアタイム: <strong>${formatTime(totalSec)}</strong></div>` +
-      `<div>倒した敵: ${defeated} / 12 + BOSS</div>` +
-      `<div>HP: ${this.hero.hp} / ${this.hero.maxHp}</div>` +
-      `<div>正解: ${correct} / ${total} (正解率 ${Math.round(accuracy * 100)}%)</div>` +
-      `<div>スコア: <strong>${score}</strong></div>`;
+      `<div>${I18n.t('ending_stat_time')}: <strong>${formatTime(totalSec)}</strong></div>` +
+      `<div>${I18n.t('ending_stat_defeated')}: ${defeated} / 12 + BOSS</div>` +
+      `<div>${I18n.t('ending_stat_correct')}: ${correct} / ${total} (${I18n.t('ending_stat_acc')} ${Math.round(accuracy * 100)}%)</div>` +
+      `<div>${I18n.t('ending_stat_mistakes')}: ${total - correct}</div>` +
+      `<div>${I18n.t('ending_stat_score')}: <strong>${score}</strong></div>`;
+    const endingRankTitle = document.querySelector('.ending-ranking-title');
+    if (endingRankTitle) endingRankTitle.textContent = I18n.t('ending_ranking_title');
+    const endingBack = document.querySelector('#screen-ending [data-action="back-title"]');
+    if (endingBack) endingBack.textContent = I18n.t('ending_back');
+    const endingTitleEl = document.querySelector('#screen-ending .ending-title');
+    if (endingTitleEl) endingTitleEl.textContent = I18n.t('ending_title');
 
     await this.renderRankingList('ending-ranking-list', { highlightId: this.rankingSubmittedId, limit: 10 });
 
@@ -422,20 +482,20 @@ const Game = {
   async renderRankingList(elementId, { highlightId, limit } = {}) {
     const el = document.getElementById(elementId);
     if (!el) return;
-    el.innerHTML = '<p style="text-align:center;padding:20px;">よみこみちゅう...</p>';
+    el.innerHTML = `<p style="text-align:center;padding:20px;">${I18n.t('ranking_loading')}</p>`;
     const entries = await SaveSystem.getRanking(limit || 20);
     if (entries.length === 0) {
-      el.innerHTML = '<div class="ranking-empty">まだ記録がありません。<br/>最初のクリアを目指そう!</div>';
+      el.innerHTML = `<div class="ranking-empty">${I18n.t('ranking_empty')}</div>`;
       return;
     }
     const rows = [];
     rows.push(
       `<div class="ranking-row header">` +
-        `<span class="rank-rank">#</span>` +
-        `<span class="rank-name">なまえ</span>` +
-        `<span class="rank-score">スコア</span>` +
-        `<span class="rank-time">じかん</span>` +
-        `<span class="rank-acc">せいかい</span>` +
+        `<span class="rank-rank">${I18n.t('ranking_col_rank')}</span>` +
+        `<span class="rank-name">${I18n.t('ranking_col_name')}</span>` +
+        `<span class="rank-score">${I18n.t('ranking_col_score')}</span>` +
+        `<span class="rank-time">${I18n.t('ranking_col_time')}</span>` +
+        `<span class="rank-acc">${I18n.t('ranking_col_acc')}</span>` +
       `</div>`
     );
     entries.forEach((e, i) => {

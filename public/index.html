@@ -15,29 +15,33 @@
     <!-- タイトル画面 -->
     <section id="screen-title" class="screen active">
       <div class="title-frame">
+        <div class="lang-toggle" data-i18n-skip>
+          <button class="lang-btn" data-lang="ja">JP</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
         <h1 class="title-logo">
           <span class="title-line1">DATADOG</span>
           <span class="title-line2">QUEST</span>
         </h1>
-        <p class="title-subtitle">- Datadog王国を旅して全ての謎を解け -</p>
+        <p class="title-subtitle" data-i18n="title_subtitle">- Datadog王国を旅して全ての謎を解け -</p>
         <div class="title-menu">
-          <button class="nes-btn primary" data-action="new-game">はじめから</button>
-          <button class="nes-btn" data-action="continue" id="continue-btn">つづきから</button>
-          <button class="nes-btn" data-action="show-ranking">ランキング</button>
-          <button class="nes-btn" data-action="reset" id="reset-btn">セーブを消す</button>
+          <button class="nes-btn primary" data-action="new-game" data-i18n="title_new">はじめから</button>
+          <button class="nes-btn" data-action="continue" id="continue-btn" data-i18n="title_continue">つづきから</button>
+          <button class="nes-btn" data-action="show-ranking" data-i18n="title_ranking">ランキング</button>
+          <button class="nes-btn" data-action="reset" id="reset-btn" data-i18n="title_reset">セーブを消す</button>
         </div>
-        <p class="title-version">Powered by Datadog ▶ Press [はじめから]</p>
+        <p class="title-version" data-i18n="title_version">Powered by Datadog ▶ Press [はじめから]</p>
       </div>
     </section>
 
     <!-- イントロ画面 -->
     <section id="screen-intro" class="screen">
       <div class="intro-frame">
-        <h2 class="intro-title">~ プロローグ ~</h2>
+        <h2 class="intro-title" data-i18n="intro_title">~ プロローグ ~</h2>
         <div class="intro-text" id="intro-text"></div>
         <div class="intro-controls">
-          <button class="nes-btn primary" id="intro-skip">▶ スキップ</button>
-          <button class="nes-btn" id="intro-next" style="display:none;">▶ 冒険にでる</button>
+          <button class="nes-btn primary" id="intro-skip" data-i18n="intro_skip">▶ スキップ</button>
+          <button class="nes-btn" id="intro-next" style="display:none;" data-i18n="intro_next">▶ 冒険にでる</button>
         </div>
       </div>
     </section>
@@ -46,21 +50,25 @@
     <section id="screen-field" class="screen">
       <div class="field-hud">
         <div class="hud-cell">
-          <span class="hud-label">ゆうしゃ</span>
+          <span class="hud-label" data-i18n="hud_hero">ゆうしゃ</span>
           <span class="hud-name" id="hero-name">-</span>
         </div>
         <div class="hud-cell hud-center">
-          <span class="hud-label">HP</span>
-          <span class="hud-hp" id="hud-hp">10/10</span>
+          <span class="hud-label" data-i18n="hud_mistakes">まちがい</span>
+          <span class="hud-hp" id="hud-mistakes">0 (100%)</span>
         </div>
         <div class="hud-cell hud-center">
-          <span class="hud-label">じかん</span>
+          <span class="hud-label" data-i18n="hud_time">じかん</span>
           <span class="hud-time" id="hud-time">00:00</span>
         </div>
         <div class="hud-cell hud-right">
-          <span class="hud-label">たおした</span>
+          <span class="hud-label" data-i18n="hud_defeated">たおした</span>
           <span class="hud-defeated"><span id="hud-defeated">0</span>/12</span>
         </div>
+      </div>
+      <div class="hud-lang-toggle" data-i18n-skip>
+        <button class="lang-btn small" data-lang="ja">JP</button>
+        <button class="lang-btn small" data-lang="en">EN</button>
       </div>
       <div class="field-wrap">
         <canvas id="field-canvas" width="480" height="384"></canvas>
@@ -69,8 +77,8 @@
         <p>方向キー(↑↓←→ または WASD)で移動。敵に触れるとバトル!</p>
       </div>
       <div class="field-controls">
-        <button class="nes-btn small" data-action="save">セーブ</button>
-        <button class="nes-btn small" data-action="back-title">タイトルに戻る</button>
+        <button class="nes-btn small" data-action="save" data-i18n="btn_save">セーブ</button>
+        <button class="nes-btn small" data-action="back-title" data-i18n="btn_back_title">タイトルに戻る</button>
       </div>
     </section>
 
@@ -89,14 +97,15 @@
         </div>
         <div class="battle-status">
           <div class="status-line">
-            <span class="status-label">ゆうしゃのHP</span>
-            <div class="hp-bar"><div class="hp-bar-fill" id="hp-bar-fill"></div></div>
-            <span class="status-val" id="battle-hp">10/10</span>
+            <span class="status-label" data-i18n="battle_lbl_correct">せいかい</span>
+            <span class="status-val" id="battle-correct">0/0</span>
+            <span class="status-label" style="margin-left:18px;" data-i18n="battle_lbl_mistakes">まちがい</span>
+            <span class="status-val" id="battle-mistakes">0</span>
           </div>
           <div class="status-line">
-            <span class="status-label">ボス進行</span>
+            <span class="status-label" data-i18n="battle_lbl_mode">モード</span>
             <span class="status-val" id="boss-progress" style="display:none;">0/5</span>
-            <span class="status-val" id="normal-progress">通常戦</span>
+            <span class="status-val" id="normal-progress" data-i18n="battle_mode_normal">通常戦</span>
           </div>
         </div>
       </div>
@@ -115,8 +124,9 @@
     <!-- 勝利エンディング画面 -->
     <section id="screen-ending" class="screen">
       <div class="ending-frame">
-        <h1 class="ending-title">Datadog王国に平和が訪れた!</h1>
-        <div class="ending-art">🏰  ✨  🐕  ✨  🌟</div>
+        <h1 class="ending-title" data-i18n="ending_title">Datadog王国に平和が訪れた!</h1>
+        <div class="ending-art" id="ending-art">🏰  ✨  🐶  ✨  🌟</div>
+        <div class="rescue-scene" id="rescue-scene"></div>
         <p class="ending-text" id="ending-text"></p>
         <div class="ending-stats" id="ending-stats"></div>
         <div class="ending-ranking">
@@ -125,19 +135,19 @@
             <p style="text-align:center;padding:12px;">よみこみちゅう...</p>
           </div>
         </div>
-        <button class="nes-btn primary" data-action="back-title">タイトルへもどる</button>
+        <button class="nes-btn primary" data-action="back-title" data-i18n="ending_back">タイトルへもどる</button>
       </div>
     </section>
 
-    <!-- ゲームオーバー画面 -->
+    <!-- ゲームオーバー画面(現在は到達しない) -->
     <section id="screen-gameover" class="screen">
       <div class="ending-frame">
-        <h1 class="ending-title gameover">ゆうしゃは たおれた...</h1>
+        <h1 class="ending-title gameover" data-i18n="gameover_title">ゆうしゃは たおれた...</h1>
         <div class="ending-art">💀</div>
-        <p class="ending-text">Datadog王国の旅はここで終わってしまった。<br/>もう一度挑戦しよう!</p>
+        <p class="ending-text" data-i18n-html="gameover_text">Datadog王国の旅はここで終わってしまった。<br/>もう一度挑戦しよう!</p>
         <div class="title-menu">
-          <button class="nes-btn primary" data-action="retry">もう一度</button>
-          <button class="nes-btn" data-action="back-title">タイトルへ</button>
+          <button class="nes-btn primary" data-action="retry" data-i18n="gameover_retry">もう一度</button>
+          <button class="nes-btn" data-action="back-title" data-i18n="gameover_back">タイトルへ</button>
         </div>
       </div>
     </section>
@@ -147,7 +157,7 @@
       <div class="modal-frame">
         <div class="modal-header" id="modal-header">けっか</div>
         <div class="modal-body" id="modal-body">...</div>
-        <button class="nes-btn primary" id="modal-ok">▶ つぎへ</button>
+        <button class="nes-btn primary" id="modal-ok" data-i18n="modal_next">▶ つぎへ</button>
       </div>
     </div>
 
@@ -181,6 +191,7 @@
 
   </div>
 
+  <script src="/js/i18n.js"></script>
   <script src="/js/sprites.js"></script>
   <script src="/js/questions.js"></script>
   <script src="/js/map.js"></script>
