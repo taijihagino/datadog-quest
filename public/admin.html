@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Datadog Quest Admin</title>
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body>
+  <header class="admin-header">
+    <h1>🛠 Datadog Quest Admin</h1>
+    <a href="/" class="link-game">← ゲーム画面へ</a>
+  </header>
+
+  <section class="toolbar">
+    <div class="stats" id="stats">読み込み中...</div>
+    <div class="actions">
+      <input type="search" id="search" placeholder="ID/問題文/解説で検索..." />
+      <select id="filter-category"><option value="">全カテゴリ</option></select>
+      <select id="filter-level">
+        <option value="">全レベル</option>
+        <option value="1">Lv.1</option>
+        <option value="2">Lv.2</option>
+        <option value="3">Lv.3 / Boss</option>
+      </select>
+      <button class="btn primary" id="btn-new">+ 新規追加</button>
+    </div>
+  </section>
+
+  <main class="list-wrap">
+    <table class="q-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Category</th>
+          <th>Lv</th>
+          <th>JP question (excerpt)</th>
+          <th>EN</th>
+          <th>Ans</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="q-tbody">
+        <tr><td colspan="7" class="empty">読み込み中...</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <!-- Edit/Add Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-frame">
+      <div class="modal-header">
+        <span id="modal-title">問題を編集</span>
+        <button class="modal-close" id="modal-close" aria-label="close">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <label>ID
+            <input type="text" id="f-id" maxlength="64" placeholder="apm_1_a / boss_x など"/>
+          </label>
+          <label>Category
+            <select id="f-category">
+              <option value="apm_rum">APM & RUM</option>
+              <option value="infra">Infrastructure</option>
+              <option value="security">Security</option>
+              <option value="agent_obs">Agent Observability</option>
+              <option value="cicd">CI/CD</option>
+              <option value="slo">SLO</option>
+              <option value="integration">Integration</option>
+            </select>
+          </label>
+          <label>Level
+            <select id="f-level">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3 (Boss)</option>
+            </select>
+          </label>
+          <label>正解 index (0-3)
+            <select id="f-answer">
+              <option value="0">0 (1番目)</option>
+              <option value="1">1 (2番目)</option>
+              <option value="2">2 (3番目)</option>
+              <option value="3">3 (4番目)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="lang-cols">
+          <fieldset class="lang-col">
+            <legend>🇯🇵 日本語</legend>
+            <label>問題文
+              <textarea id="ja-question" rows="3"></textarea>
+            </label>
+            <div class="choices">
+              <label>選択肢 0 <input type="text" id="ja-c0"/></label>
+              <label>選択肢 1 <input type="text" id="ja-c1"/></label>
+              <label>選択肢 2 <input type="text" id="ja-c2"/></label>
+              <label>選択肢 3 <input type="text" id="ja-c3"/></label>
+            </div>
+            <label>解説
+              <textarea id="ja-explanation" rows="3"></textarea>
+            </label>
+          </fieldset>
+
+          <fieldset class="lang-col">
+            <legend>🇬🇧 English (optional)</legend>
+            <label>Question
+              <textarea id="en-question" rows="3"></textarea>
+            </label>
+            <div class="choices">
+              <label>Choice 0 <input type="text" id="en-c0"/></label>
+              <label>Choice 1 <input type="text" id="en-c1"/></label>
+              <label>Choice 2 <input type="text" id="en-c2"/></label>
+              <label>Choice 3 <input type="text" id="en-c3"/></label>
+            </div>
+            <label>Explanation
+              <textarea id="en-explanation" rows="3"></textarea>
+            </label>
+          </fieldset>
+        </div>
+
+        <div id="form-errors" class="errors"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn danger" id="btn-delete" style="margin-right:auto;display:none;">🗑 削除</button>
+        <button class="btn" id="btn-cancel">キャンセル</button>
+        <button class="btn primary" id="btn-save">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

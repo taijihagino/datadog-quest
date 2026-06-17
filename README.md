@@ -124,6 +124,34 @@ Use **GCS FUSE** or **Cloud Run Volumes** for persistence.
 
 These platforms auto-detect the `Dockerfile`. Enable a Persistent Disk and mount `data/`.
 
+## 🛠 Admin UI
+
+A built-in admin screen at `/admin` lets you manage the question bank (CRUD) without editing JSON files by hand. Both Japanese and English fields are edited side-by-side.
+
+### Enabling
+
+Set `ADMIN_PASSWORD` (and optionally `ADMIN_USERNAME`, default `admin`) before launching:
+
+```bash
+ADMIN_PASSWORD=your-strong-password npm start
+# or
+ADMIN_USERNAME=admin ADMIN_PASSWORD=your-strong-password node server.js
+```
+
+Open http://localhost:3000/admin and authenticate via Basic Auth.
+
+If `ADMIN_PASSWORD` is unset, the admin endpoints return `503 Admin disabled`.
+
+### Features
+
+- List, search and filter all questions by category / level
+- Create, edit, delete questions (writes back to `data/questions.json` and `data/questions.en.json` atomically)
+- English fields are optional per question
+
+### Security note
+
+Basic Auth over plain HTTP is only suitable for trusted networks (localhost, internal VPN, dev/PoC). For public deployments put a TLS-terminating reverse proxy in front, or replace with a stronger auth solution.
+
 ## 📁 Project Layout
 
 ```
@@ -139,15 +167,20 @@ These platforms auto-detect the `Dockerfile`. Enable a Persistent Disk and mount
 │   └── saves/                 # Per-player saves (runtime, gitignored)
 └── public/
     ├── index.html
-    ├── css/style.css
+    ├── admin.html             # Admin UI (Basic Auth)
+    ├── css/
+    │   ├── style.css
+    │   └── admin.css
     └── js/
         ├── i18n.js            # UI string table (JP/EN)
+        ├── audio.js           # Chiptune sound FX
         ├── game.js            # Main state machine
         ├── map.js             # Field map
         ├── battle.js          # Battle & questions
         ├── questions.js       # Question selection & localization
         ├── save.js            # Saves & ranking API
-        └── sprites.js         # Characters
+        ├── sprites.js         # Characters
+        └── admin.js           # Admin UI logic
 ```
 
 ## 🔌 API Endpoints

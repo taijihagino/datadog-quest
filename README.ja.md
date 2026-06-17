@@ -126,6 +126,34 @@ gcloud run deploy datadog-quest \
 
 `Dockerfile` をそのまま検出してデプロイ可能。Persistent Disk を有効化して `data/` をマウントしてください。
 
+## 🛠 管理画面 (Admin UI)
+
+`/admin` に問題バンクのCRUDが可能な管理画面を内蔵しています。日本語と英語のフィールドを並べて同時編集できます。
+
+### 有効化
+
+`ADMIN_PASSWORD`(任意で `ADMIN_USERNAME`、デフォルト `admin`)を設定して起動:
+
+```bash
+ADMIN_PASSWORD=your-strong-password npm start
+# または
+ADMIN_USERNAME=admin ADMIN_PASSWORD=your-strong-password node server.js
+```
+
+ブラウザで http://localhost:3000/admin を開いて Basic 認証ダイアログにユーザー名・パスワードを入力。
+
+`ADMIN_PASSWORD` 未設定の場合は `503 Admin disabled` を返します。
+
+### 機能
+
+- カテゴリ / レベルでの絞り込み、ID / 問題文での検索
+- 問題の追加・編集・削除(`data/questions.json` と `data/questions.en.json` にアトミック書き込み)
+- 英訳は問題ごとに任意(空ならその問題は日本語のみ)
+
+### セキュリティ注意
+
+Basic認証 + プレーンHTTPは信頼できるネットワーク(localhost、内部VPN、PoC)でのみ利用してください。公開環境ではTLS終端のリバースプロキシを前段に置くか、より強力な認証方式に置き換えてください。
+
 ## 📁 ディレクトリ構成
 
 ```
@@ -140,12 +168,18 @@ gcloud run deploy datadog-quest \
 │   └── saves/             # プレイヤー別セーブ(自動生成・gitignore)
 └── public/
     ├── index.html
-    ├── css/style.css
+    ├── admin.html         # 管理画面 (Basic認証)
+    ├── css/
+    │   ├── style.css
+    │   └── admin.css
     └── js/
+        ├── i18n.js        # UI文字列 (JP/EN)
+        ├── audio.js       # チップチューンSE
         ├── game.js        # メイン状態機
         ├── map.js         # フィールドマップ
         ├── battle.js      # バトル & 出題
         ├── questions.js   # 問題管理 & ランダム選択
+        ├── admin.js       # 管理画面ロジック
         ├── save.js        # セーブ & ランキングAPI
         └── sprites.js     # キャラ定義
 ```
