@@ -51,7 +51,8 @@ const I18N_STRINGS = {
       `さあ ${name} よ、 つるぎ を にぎりしめ、\n` +
       `Datadog王国を 旅して 12の 試練を のりこえよ。\n` +
       `その先に まちうける DARK BITS を 打ちたおし、\n` +
-      `とらわれた Bits を 救い出すのだ!`,
+      `日がくれる前に いそいで Bits を 救い出すのだ!\n\n` +
+      `※ このゲームは問題の正答率とクリアまでのプレイ時間によってスコアリングされます`,
 
     name_title: 'なまえを いれてください',
     name_q: 'あなたのゆうしゃの なまえは?',
@@ -199,7 +200,8 @@ const I18N_STRINGS = {
       `Now, ${name}, take up your sword,\n` +
       `travel the Datadog Kingdom, and overcome 12 trials.\n` +
       `Beyond them lies the final battle with DARK BITS.\n` +
-      `Defeat the impostor and rescue the captive Bits!`,
+      `Hurry and rescue Bits before the sun goes down!\n\n` +
+      `* Your score is based on your answer accuracy and the time it takes to clear the game.`,
 
     name_title: 'Enter Your Name',
     name_q: "What is your hero's name?",
