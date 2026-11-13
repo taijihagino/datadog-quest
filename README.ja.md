@@ -9,6 +9,14 @@ Datadog王国を旅して、Datadogのスキル(APM/RUM・インフラ・セキ�
 ![lang](https://img.shields.io/badge/lang-JP%2FEN-blue)
 ![node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)
 
+## 📸 ゲームイメージ
+
+| タイトル画面 | ゲームフィールド画面 | バトル画面 |
+|:---:|:---:|:---:|
+| <img src="docs/images/ja/title.png" alt="タイトル画面" width="280" /> | <img src="docs/images/ja/field.png" alt="ゲームフィールド画面" width="280" /> | <img src="docs/images/ja/battle.png" alt="バトル画面" width="280" /> |
+
+> ネタバレ防止のため、エンディング画面は掲載していません。ぜひ自分の目で確かめてください!
+
 ## 🎮 ゲームの概要
 
 - 偽物の魔王 **DARK BITS** に乗っ取られた Datadog王国を救う冒険RPG
@@ -109,7 +117,7 @@ docker compose up --build
 FSが揮発する環境(Cloud Run, AWS Lambda, ECS Fargate without EFS など)では
 インスタンス再起動でデータが消えます。本格運用では以下のいずれかを推奨:
 
-- 永続ボリュームをマウントする(EFS / Persistent Disk / Render Disk 等)
+- 永続ボリュームをマウントする(EFS / Persistent Disk / Azure Files / Render Disk 等)
 - 外部ストア(Redis、Postgres、Datadog KVなど)に移行する
 
 ### Cloud Run へのデプロイ例
@@ -132,6 +140,56 @@ gcloud run deploy datadog-quest \
 1. ECRにイメージをpush
 2. ECS Task Definitionで `data/` をEFSにマウント
 3. ALBまたはPublic IPで公開
+
+### Azure Container Apps へのデプロイ例
+
+```bash
+RG=datadog-quest-rg
+LOCATION=japaneast
+ACR=datadogquest$RANDOM   # グローバルで一意な名前が必要
+ENV_NAME=datadog-quest-env
+
+# サブスクリプションで初回のみ: 必要なリソースプロバイダーを登録
+az provider register -n Microsoft.App --wait
+az provider register -n Microsoft.OperationalInsights --wait
+az provider register -n Microsoft.ContainerRegistry --wait
+
+# リソースグループとコンテナレジストリ
+az group create -n $RG -l $LOCATION
+az acr create -g $RG -n $ACR --sku Basic
+
+# build & push (ACR Tasks でクラウド上でビルド。ローカルの Docker は不要)
+az acr build -r $ACR -t datadog-quest:latest .
+
+# Container Apps 環境
+az containerapp env create -g $RG -n $ENV_NAME -l $LOCATION
+
+# deploy (※デモ用途・永続化なし)
+az containerapp create -g $RG -n datadog-quest \
+  --environment $ENV_NAME \
+  --image $ACR.azurecr.io/datadog-quest:latest \
+  --registry-server $ACR.azurecr.io \
+  --registry-identity system \
+  --target-port 3000 \
+  --ingress external \
+  --min-replicas 1 --max-replicas 1 \
+  --secrets admin-password=<your-strong-password> \
+  --env-vars ADMIN_USERNAME=admin ADMIN_PASSWORD=secretref:admin-password
+
+# 公開URLを表示
+az containerapp show -g $RG -n datadog-quest \
+  --query properties.configuration.ingress.fqdn -o tsv
+```
+
+- セーブ・ランキングは各レプリカのローカルFSに保存されるため、`--max-replicas 1` で1台に固定しています。
+- 管理画面のパスワードは Container Apps のシークレットに保存し、`secretref:` で参照します。
+- 作成直後は、URLが応答するまで数分かかることがあります。
+
+永続化が必要なら **Azure Files** をマウント:
+
+1. ストレージアカウントとファイル共有を作成し、`data/questions.json` と `data/questions.en.json` をアップロード(マウントするとイメージ内の `data/` が置き換わるため)
+2. 環境に登録: `az containerapp env storage set --access-mode ReadWrite --azure-file-account-name ... --azure-file-account-key ... --azure-file-share-name ...`
+3. アプリの YAML に volume(`storageType: AzureFile`)と `/app/data` への `volumeMounts` を追加し、`az containerapp update --yaml` で反映
 
 ### Render / Railway / Fly.io
 
@@ -174,6 +232,7 @@ Basic認証 + プレーンHTTPは信頼できるネットワーク(localhost、�
 ├── package.json
 ├── Dockerfile
 ├── docker-compose.yml
+├── docs/images/               # README 用スクリーンショット (ja / en)
 ├── data/
 │   ├── questions.json     # 問題バンク(日本語)
 │   ├── questions.en.json  # 英訳(問題idをキーに対応)

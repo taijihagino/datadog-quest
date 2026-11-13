@@ -8,6 +8,14 @@ A NES-style retro RPG that quizzes you on Datadog skills (APM/RUM, Infrastructur
 ![lang](https://img.shields.io/badge/lang-JP%2FEN-blue)
 ![node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)
 
+## 📸 Screenshots
+
+| Title | Field | Battle |
+|:---:|:---:|:---:|
+| <img src="docs/images/en/title.png" alt="Title screen" width="280" /> | <img src="docs/images/en/field.png" alt="Field map" width="280" /> | <img src="docs/images/en/battle.png" alt="Battle screen" width="280" /> |
+
+> The ending is not shown here to avoid spoilers — rescue Bits and see it for yourself!
+
 ## 🎮 Story
 
 The Datadog Kingdom was protected by a small fairy called **Bits**, who lit the realm with the light of metrics and traces. One day an impostor calling itself **DARK BITS** seized the king's castle, imprisoned the true Bits deep inside, and plunged the kingdom into darkness.
@@ -104,7 +112,7 @@ docker compose up --build
 
 Saves and rankings are stored in the filesystem under `data/`. On platforms with ephemeral disks (Cloud Run, Lambda, ECS Fargate without EFS, etc.) data is lost when instances restart. For production, do one of:
 
-- Mount a persistent volume (EFS / Persistent Disk / Render Disk, etc.)
+- Mount a persistent volume (EFS / Persistent Disk / Azure Files / Render Disk, etc.)
 - Migrate to an external store (Redis, Postgres, Datadog KV, etc.)
 
 ### Cloud Run example
@@ -127,6 +135,56 @@ Use **GCS FUSE** or **Cloud Run Volumes** for persistence.
 1. Push the image to ECR
 2. Mount `data/` to EFS in the ECS Task Definition
 3. Expose via ALB or a public IP
+
+### Azure Container Apps
+
+```bash
+RG=datadog-quest-rg
+LOCATION=japaneast
+ACR=datadogquest$RANDOM   # must be globally unique
+ENV_NAME=datadog-quest-env
+
+# first time per subscription: register the required resource providers
+az provider register -n Microsoft.App --wait
+az provider register -n Microsoft.OperationalInsights --wait
+az provider register -n Microsoft.ContainerRegistry --wait
+
+# resource group & container registry
+az group create -n $RG -l $LOCATION
+az acr create -g $RG -n $ACR --sku Basic
+
+# build & push (built in the cloud by ACR Tasks - no local Docker required)
+az acr build -r $ACR -t datadog-quest:latest .
+
+# Container Apps environment
+az containerapp env create -g $RG -n $ENV_NAME -l $LOCATION
+
+# deploy (demo only - no persistence)
+az containerapp create -g $RG -n datadog-quest \
+  --environment $ENV_NAME \
+  --image $ACR.azurecr.io/datadog-quest:latest \
+  --registry-server $ACR.azurecr.io \
+  --registry-identity system \
+  --target-port 3000 \
+  --ingress external \
+  --min-replicas 1 --max-replicas 1 \
+  --secrets admin-password=<your-strong-password> \
+  --env-vars ADMIN_USERNAME=admin ADMIN_PASSWORD=secretref:admin-password
+
+# print the public URL
+az containerapp show -g $RG -n datadog-quest \
+  --query properties.configuration.ingress.fqdn -o tsv
+```
+
+- `--max-replicas 1` keeps saves/rankings consistent, since they live on the local filesystem of each replica.
+- The admin password is stored as a Container Apps secret and referenced via `secretref:`.
+- Right after creation, the URL may take a few minutes to start responding.
+
+For persistence, mount an **Azure Files** share:
+
+1. Create a Storage Account and a file share, then upload `data/questions.json` and `data/questions.en.json` to it (the mount replaces the image's `data/` directory)
+2. Register it with the environment: `az containerapp env storage set --access-mode ReadWrite --azure-file-account-name ... --azure-file-account-key ... --azure-file-share-name ...`
+3. Add a volume (`storageType: AzureFile`) and a `volumeMounts` entry at `/app/data` to the app's YAML, then apply it with `az containerapp update --yaml`
 
 ### Render / Railway / Fly.io
 
@@ -169,6 +227,7 @@ Basic Auth over plain HTTP is only suitable for trusted networks (localhost, int
 ├── package.json
 ├── Dockerfile
 ├── docker-compose.yml
+├── docs/images/               # README screenshots (ja / en)
 ├── data/
 │   ├── questions.json         # Japanese question bank
 │   ├── questions.en.json      # English translations (keyed by question id)
