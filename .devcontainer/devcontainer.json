@@ -1,7 +1,7 @@
 {
-  "name": "claude-code-template",
+  "name": "datadog-quest",
   "image": "mcr.microsoft.com/devcontainers/base:bookworm",
-  "workspaceFolder": "/workspaces/claude-code-template",
+  "workspaceFolder": "/workspaces/datadog-quest",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {}
