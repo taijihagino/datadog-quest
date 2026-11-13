@@ -33,7 +33,7 @@ You — a hero summoned to restore observability — must travel the kingdom, de
 
 ### Features
 
-- Tile-based movement (arrow keys / WASD)
+- Tile-based movement (arrow keys / WASD, on-screen D-pad, or swipe)
 - 12 enemies placed randomly on the map each new game
 - Choice order is shuffled so the correct answer is never always at position 1
 - Player name entry → typewriter-style intro → adventure begins
@@ -43,6 +43,10 @@ You — a hero summoned to restore observability — must travel the kingdom, de
 - Rankings (top 20) available from the title screen and end-of-game
 - **Bilingual UI and questions** with an in-game language toggle (JP / EN)
 - Wrong answers don't end the game — keep playing and your score absorbs the penalty
+- **Responsive layout**: the field screen fills the browser and follows window resizing
+- **Mobile friendly**: touch controls (on-screen D-pad + swipe) appear automatically on touch devices / small screens
+- **Crisp at any size**: the field canvas renders at the display resolution (device pixel ratio aware), so characters and enemies stay sharp even when scaled up
+- **No-save buttons are greyed out** ("Continue" / "Delete save") until a save exists
 
 ## 🚀 Run Locally
 
@@ -71,9 +75,13 @@ PORT=8080 npm start
 | Input | Action |
 | -- | -- |
 | ↑↓←→ / WASD | Move the hero |
-| Click | Pick an answer / press a button |
+| On-screen D-pad (▲◀▶▼) | Move the hero (touch devices / narrow screens) |
+| Swipe on the field | Move the hero one tile in the swipe direction |
+| Click / Tap | Pick an answer / press a button |
 | Enter | Confirm name dialog |
 | JP / EN buttons | Switch language (title screen + HUD) |
+
+> The on-screen D-pad shows up automatically on touch devices and when the viewport is narrow (≤ 820px). On a desktop you can preview it with your browser's device toolbar.
 
 ## 🐳 Docker
 
@@ -147,6 +155,7 @@ If `ADMIN_PASSWORD` is unset, the admin endpoints return `503 Admin disabled`.
 - List, search and filter all questions by category / level
 - Create, edit, delete questions (writes back to `data/questions.json` and `data/questions.en.json` atomically)
 - English fields are optional per question
+- **Reset the leaderboard** — the "🏆 Reset ranking" button clears all ranking entries (`data/ranking.json`) after a confirmation dialog
 
 ### Security note
 
@@ -193,6 +202,19 @@ Basic Auth over plain HTTP is only suitable for trusted networks (localhost, int
 | DELETE | `/api/save/:playerId` | Delete the player's save |
 | GET  | `/api/ranking?limit=20` | Top entries on the leaderboard |
 | POST | `/api/ranking` | Submit a score |
+| DELETE | `/api/ranking` | Reset the leaderboard (**admin only**, requires Basic Auth) |
+
+### Admin endpoints (require Basic Auth)
+
+| Method | Path | Description |
+| -- | -- | -- |
+| GET  | `/admin` | Admin UI (HTML) |
+| GET  | `/api/admin/questions` | List all questions (with categories) |
+| GET  | `/api/admin/questions/:id` | Get a single question |
+| POST | `/api/admin/questions` | Create a question |
+| PUT  | `/api/admin/questions/:id` | Update a question |
+| DELETE | `/api/admin/questions/:id` | Delete a question |
+| DELETE | `/api/ranking` | Reset the leaderboard |
 
 ## 🛠 Add / Edit Questions
 

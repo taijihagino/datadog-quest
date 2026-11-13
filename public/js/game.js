@@ -38,6 +38,7 @@ const Game = {
 
     this.bindButtons();
     this.bindKeyboard();
+    this.bindTouchControls();
     this.bindNameModal();
     this.bindRankingModal();
     this.bindIntro();
@@ -63,25 +64,85 @@ const Game = {
     });
   },
 
+  // 移動を受け付けてよい状態か(フィールド表示中かつモーダルが開いていない)
+  canMoveNow() {
+    if (this.screen !== 'field') return false;
+    if (!document.getElementById('name-modal').classList.contains('hidden')) return false;
+    if (!document.getElementById('ranking-modal').classList.contains('hidden')) return false;
+    if (!document.getElementById('modal').classList.contains('hidden')) return false;
+    return true;
+  },
+
+  // 方向名(up/down/left/right)から移動
+  moveByDir(dir) {
+    if (!this.canMoveNow()) return;
+    const map = {
+      up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0]
+    };
+    const d = map[dir];
+    if (!d) return;
+    this.attemptMove(d[0], d[1]);
+  },
+
   bindKeyboard() {
     document.addEventListener('keydown', (e) => {
-      // 名前入力中はキーボード移動を無効化
-      if (!document.getElementById('name-modal').classList.contains('hidden')) return;
-      if (!document.getElementById('ranking-modal').classList.contains('hidden')) return;
-      if (this.screen !== 'field') return;
-      if (!document.getElementById('modal').classList.contains('hidden')) return;
+      if (!this.canMoveNow()) return;
 
-      let dx = 0, dy = 0;
+      let dir = null;
       switch (e.key) {
-        case 'ArrowUp': case 'w': case 'W': dy = -1; break;
-        case 'ArrowDown': case 's': case 'S': dy = 1; break;
-        case 'ArrowLeft': case 'a': case 'A': dx = -1; break;
-        case 'ArrowRight': case 'd': case 'D': dx = 1; break;
+        case 'ArrowUp': case 'w': case 'W': dir = 'up'; break;
+        case 'ArrowDown': case 's': case 'S': dir = 'down'; break;
+        case 'ArrowLeft': case 'a': case 'A': dir = 'left'; break;
+        case 'ArrowRight': case 'd': case 'D': dir = 'right'; break;
         default: return;
       }
       e.preventDefault();
-      this.attemptMove(dx, dy);
+      this.moveByDir(dir);
     });
+  },
+
+  // タッチ操作: 十字キー(ソフトウェアキー) + キャンバスのスワイプ
+  bindTouchControls() {
+    // 十字キー
+    document.querySelectorAll('.dpad-btn[data-move]').forEach(btn => {
+      const dir = btn.getAttribute('data-move');
+      // pointerdownで即応答し、クリックの遅延や二重発火を避ける
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        this.moveByDir(dir);
+      });
+    });
+
+    // スワイプ(フィールドキャンバス上)
+    const canvas = document.getElementById('field-canvas');
+    const THRESHOLD = 24; // この距離以上動いたらスワイプとみなす(px)
+    let sx = 0, sy = 0, tracking = false;
+
+    canvas.addEventListener('touchstart', (e) => {
+      if (!this.canMoveNow()) return;
+      const t = e.changedTouches[0];
+      sx = t.clientX; sy = t.clientY;
+      tracking = true;
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', (e) => {
+      // キャンバス上のスワイプでページがスクロールしないように
+      if (tracking) e.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', (e) => {
+      if (!tracking) return;
+      tracking = false;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - sx;
+      const dy = t.clientY - sy;
+      if (Math.abs(dx) < THRESHOLD && Math.abs(dy) < THRESHOLD) return;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        this.moveByDir(dx > 0 ? 'right' : 'left');
+      } else {
+        this.moveByDir(dy > 0 ? 'down' : 'up');
+      }
+    }, { passive: true });
   },
 
   bindNameModal() {
@@ -442,6 +503,8 @@ const Game = {
     this.screen = name;
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-' + name).classList.add('active');
+    // フィールド表示時はレイアウト確定後に内部解像度を合わせる
+    if (name === 'field') FieldMap.resize();
   },
 
   async showEnding(bossStats) {

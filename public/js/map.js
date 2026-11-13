@@ -47,11 +47,58 @@ const FieldMap = {
   enemies: [],
   bossDefeated: false,
 
+  scaleX: 1,
+  scaleY: 1,
+  _raf: null,
+
   init() {
     this.canvas = document.getElementById('field-canvas');
     this.ctx = this.canvas.getContext('2d');
     this.ctx.imageSmoothingEnabled = false;
     this.reset();
+
+    // 画面サイズ変更・端末回転に追従して内部解像度を再計算
+    const onResize = () => {
+      if (this._raf) cancelAnimationFrame(this._raf);
+      this._raf = requestAnimationFrame(() => this.resize());
+    };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+  },
+
+  // キャンバスの内部解像度を実表示サイズ(×DPR)に合わせ、論理座標系(480x384)へスケールする。
+  // これにより拡大してもアイコン(絵文字)がベクターのまま鮮明に描画される。
+  resize() {
+    const wrap = this.canvas.parentElement;
+    if (!wrap) return;
+    const cw = wrap.clientWidth;
+    const ch = wrap.clientHeight;
+    if (!cw || !ch) return; // 非表示(display:none)時はスキップ
+
+    const dpr = window.devicePixelRatio || 1;
+    const ratio = MAP_W / MAP_H; // 15/12 = 1.25
+
+    // field-wrap 内でアスペクト比を保って最大となる表示サイズ(CSS px)
+    let dw = cw;
+    let dh = cw / ratio;
+    if (dh > ch) { dh = ch; dw = ch * ratio; }
+
+    const bw = Math.max(1, Math.round(dw * dpr));
+    const bh = Math.max(1, Math.round(dh * dpr));
+    if (this.canvas.width !== bw || this.canvas.height !== bh) {
+      this.canvas.width = bw;
+      this.canvas.height = bh;
+    }
+
+    this.scaleX = bw / (MAP_W * TILE_SIZE);
+    this.scaleY = bh / (MAP_H * TILE_SIZE);
+
+    const ctx = this.ctx;
+    // canvas.width/height を代入するとコンテキスト状態がリセットされるため再設定
+    ctx.setTransform(this.scaleX, 0, 0, this.scaleY, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+
+    this.render();
   },
 
   reset() {
@@ -175,8 +222,9 @@ const FieldMap = {
   // ====== レンダリング ======
   render() {
     const ctx = this.ctx;
-    const W = this.canvas.width;
-    const H = this.canvas.height;
+    // 論理座標系(setTransformでスケール済み)でクリア
+    const W = MAP_W * TILE_SIZE;
+    const H = MAP_H * TILE_SIZE;
     ctx.clearRect(0, 0, W, H);
 
     // タイル描画

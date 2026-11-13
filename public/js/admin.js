@@ -12,6 +12,7 @@ const Admin = {
 
   bind() {
     document.getElementById('btn-new').addEventListener('click', () => this.openEdit(null));
+    document.getElementById('btn-reset-ranking').addEventListener('click', () => this.resetRanking());
     document.getElementById('btn-cancel').addEventListener('click', () => this.closeModal());
     document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
     document.getElementById('btn-save').addEventListener('click', () => this.save());
@@ -240,6 +241,25 @@ const Admin = {
       await this.load();
     } catch (e) {
       this.showErrors([e.message]);
+    }
+  },
+
+  async resetRanking() {
+    if (!confirm('ランキングを全件リセットします。この操作は取り消せません。よろしいですか?')) return;
+    try {
+      const res = await fetch('/api/ranking', { method: 'DELETE' });
+      if (res.status === 401) {
+        location.reload();
+        return;
+      }
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert('リセット失敗: ' + (j.error || `HTTP ${res.status}`));
+        return;
+      }
+      alert(`ランキングをリセットしました(${j.cleared} 件削除)`);
+    } catch (e) {
+      alert('Fetch error: ' + e.message);
     }
   }
 };
