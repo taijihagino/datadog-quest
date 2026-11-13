@@ -22,7 +22,8 @@ COPY data ./data
 COPY public ./public
 
 # data/saves と data/ranking.json は実行時に書き込まれるのでownerをappに
-RUN mkdir -p ./data/saves && chown -R app:app ./data
+# public はホスト側のパーミッションに関わらず app ユーザーが読めるようにする
+RUN mkdir -p ./data/saves && chown -R app:app ./data && chmod -R a+rX ./public
 
 USER app
 
